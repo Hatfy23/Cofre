@@ -2,1098 +2,576 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#241811">
 <title>Cofre de Documentos</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📜</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --bg:#12161C;
-  --surface:#1B212B;
-  --surface-2:#212938;
-  --border:#2A323F;
-  --text:#E8ECF1;
-  --text-dim:#8B96A5;
-  --text-faint:#5C6675;
-  --brass:#C9A227;
-  --brass-dim:#7A6420;
-  --danger:#C1553A;
-  --danger-dim:#3A2420;
-  --success:#5B9279;
-  --radius:10px;
-  --radius-sm:6px;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:'Inter',sans-serif;
-  min-height:100vh;
-  -webkit-font-smoothing:antialiased;
-}
-.mono{font-family:'JetBrains Mono',monospace;}
-.serif{font-family:'Fraunces',serif;}
-button{font-family:inherit;cursor:pointer;}
-input,select,textarea{font-family:inherit;}
-a{color:var(--brass);}
-::selection{background:var(--brass-dim);color:#fff;}
+:root{--wood:#140e09;--leather:#241811;--leather2:#33241a;--parch:#ecdfbd;--parch2:#dfcc9b;--ink:#2b1c0f;--ink2:#6a5238;--gold:#cfa84c;--gold2:#8a6a26;--blood:#9a2f24}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{font-size:17px}
+body{font-family:'EB Garamond',Georgia,serif;color:var(--ink);background:var(--wood) repeating-linear-gradient(90deg,rgba(255,255,255,.015) 0 2px,transparent 2px 7px);min-height:100vh;padding-bottom:100px}
+svg{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+button{font-family:inherit}
 
-/* ---------- Lock / Setup screens ---------- */
-#lockScreen, #setupScreen{
-  position:fixed;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 50% 30%, #1a2130 0%, #0f1319 70%);
-  z-index:100;
-  padding:24px;
-}
-.seal{
-  width:64px;height:64px;border-radius:50%;
-  border:2px solid var(--brass);
-  display:flex;align-items:center;justify-content:center;
-  margin:0 auto 20px;
-  position:relative;
-}
-.seal::before{
-  content:'';
-  position:absolute;inset:6px;
-  border:1px solid var(--brass-dim);
-  border-radius:50%;
-}
-.seal svg{width:26px;height:26px;stroke:var(--brass);}
-.auth-card{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:40px 36px;
-  width:100%;max-width:380px;
-  text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,.4);
-}
-.auth-card h1{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:600;margin-bottom:6px;}
-.auth-card p{color:var(--text-dim);font-size:.875rem;margin-bottom:24px;line-height:1.5;}
-.auth-card input{
-  width:100%;padding:12px 14px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  border-radius:var(--radius-sm);
-  color:var(--text);font-size:.95rem;
-  margin-bottom:12px;
-  outline:none;
-  transition:border-color .15s;
-}
-.auth-card input:focus{border-color:var(--brass-dim);}
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:11px 18px;
-  border-radius:var(--radius-sm);
-  border:1px solid var(--border);
-  background:var(--surface-2);
-  color:var(--text);
-  font-size:.875rem;font-weight:500;
-  transition:all .15s;
-}
-.btn:hover{border-color:var(--text-faint);}
-.btn-primary{
-  background:var(--brass);border-color:var(--brass);color:#1B1500;font-weight:600;width:100%;
-}
-.btn-primary:hover{background:#dcb32f;}
-.btn-danger{border-color:var(--danger-dim);color:var(--danger);}
-.btn-danger:hover{background:var(--danger-dim);}
-.auth-error{color:var(--danger);font-size:.8rem;margin-top:-4px;margin-bottom:12px;min-height:1em;}
-.auth-hint{margin-top:18px;font-size:.75rem;color:var(--text-faint);}
-.auth-hint button{background:none;border:none;color:var(--text-faint);text-decoration:underline;font-size:.75rem;}
+/* topo */
+.top{position:sticky;top:0;z-index:20;background:linear-gradient(var(--leather2),var(--leather));border-bottom:2px solid var(--gold2);box-shadow:0 2px 0 #000,0 6px 18px rgba(0,0,0,.5);padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));display:flex;align-items:center;gap:8px}
+.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0;color:var(--gold)}
+.brand svg{font-size:26px;flex:none}
+.brand h1{font-family:Cinzel,serif;font-size:1.1rem;letter-spacing:.06em;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{width:42px;height:42px;flex:none;border-radius:50%;border:1px solid var(--gold2);background:rgba(0,0,0,.25);color:var(--gold);display:grid;place-items:center;cursor:pointer;font-size:20px}
+.ib:active{background:rgba(207,168,76,.25)}
 
-/* ---------- App shell ---------- */
-#app{display:none;min-height:100vh;grid-template-columns:240px 1fr;}
-#app.active{display:grid;}
-aside{
-  background:var(--surface);
-  border-right:1px solid var(--border);
-  padding:22px 16px;
-  display:flex;flex-direction:column;
-  position:sticky;top:0;height:100vh;
-}
-.brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px;border-bottom:1px solid var(--border);margin-bottom:18px;}
-.brand .seal{width:34px;height:34px;margin:0;}
-.brand .seal svg{width:15px;height:15px;}
-.brand-text{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;line-height:1.15;}
-.brand-text small{display:block;font-family:'Inter',sans-serif;font-weight:400;font-size:.7rem;color:var(--text-faint);margin-top:2px;}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px}
+.search{display:flex;align-items:center;gap:10px;background:var(--parch);border:2px solid var(--gold2);border-radius:10px;padding:0 14px;box-shadow:inset 0 2px 6px rgba(60,35,10,.35)}
+.search svg{font-size:20px;color:var(--gold2);flex:none}
+.search input{flex:1;min-width:0;background:none;border:0;outline:0;font:inherit;font-size:1.15rem;padding:14px 0;color:var(--ink)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:14px 2px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+@media(min-width:700px){.chips{flex-wrap:wrap;overflow:visible}}
+.chip{flex:none;border:1px solid var(--gold2);background:var(--leather);color:var(--gold);border-radius:999px;padding:7px 16px;font-size:1rem;cursor:pointer}
+.chip.on{background:linear-gradient(#e0bd63,#b8903a);color:var(--ink);border-color:#e8cd85;font-weight:600}
+.searching .chip{opacity:.45}
+.bar{display:flex;justify-content:space-between;align-items:center;color:#b9a27a;font-size:.95rem;padding:8px 4px}
+.lnk{background:none;border:0;color:var(--gold);font-size:inherit;text-decoration:underline;cursor:pointer;padding:6px}
+.on-parch .lnk{color:var(--ink2)}
 
-.nav-section{margin-bottom:20px;}
-.nav-label{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-faint);padding:0 10px;margin-bottom:8px;}
-.nav-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:9px 10px;border-radius:var(--radius-sm);
-  color:var(--text-dim);font-size:.875rem;
-  cursor:pointer;transition:background .12s,color .12s;
-  border:1px solid transparent;
-}
-.nav-item:hover{background:var(--surface-2);color:var(--text);}
-.nav-item.active{background:var(--surface-2);color:var(--text);border-color:var(--border);}
-.nav-item .count{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--text-faint);}
-.nav-item.active .count{color:var(--brass);}
-.nav-item-icon{width:14px;height:14px;stroke:var(--text-faint);flex-shrink:0;margin-right:8px;}
-.nav-item.active .nav-item-icon{stroke:var(--brass);}
-.nav-item-label{display:flex;align-items:center;flex:1;min-width:0;}
-.nav-item-label span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* lista */
+.list{list-style:none;background:linear-gradient(var(--parch),var(--parch2));border:2px solid var(--gold2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.55),inset 0 0 40px rgba(110,70,20,.25);overflow:hidden}
+.row{display:flex;align-items:center;border-bottom:1px dashed rgba(106,82,56,.5)}
+.row:last-child{border-bottom:0}
+.row.dragging{background:rgba(207,168,76,.4)}
+.rmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:12px 6px 12px 14px;background:none;border:0;color:inherit;text-align:left;cursor:pointer;font-size:inherit}
+.rmain:hover{background:rgba(207,168,76,.18)}
+.ico{flex:none;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--gold2);display:grid;place-items:center;color:#6e4f17;background:rgba(207,168,76,.25);font-size:20px}
+.txt{min-width:0;display:flex;flex-direction:column}
+.txt b{font-weight:600;font-size:1.15rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.txt small{color:var(--ink2);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.warn{color:var(--blood);font-weight:600}
+.more{flex:none;width:48px;align-self:stretch;background:none;border:0;color:var(--ink2);font-size:22px;cursor:pointer;display:grid;place-items:center}
+.grip{display:none;flex:none;width:44px;align-self:stretch;place-items:center;color:var(--gold2);touch-action:none;cursor:grab;font-size:22px}
+.org .grip{display:grid}
+.empty{text-align:center;color:#b9a27a;padding:40px 10px;font-style:italic}
+.fab{position:fixed;right:max(18px,calc((100vw - 760px)/2 + 14px));bottom:calc(18px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:2px solid #e8cd85;background:linear-gradient(#e0bd63,#b8903a);color:var(--ink);font-size:28px;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.6);z-index:15}
 
-.sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);}
-.sidebar-footer-text{font-size:.72rem;color:var(--text-faint);margin-bottom:12px;}
-.icon-btn-row{display:flex;gap:6px;margin-top:8px;}
-.icon-btn{
-  flex:1;padding:8px;border-radius:var(--radius-sm);
-  background:var(--surface-2);border:1px solid var(--border);
-  color:var(--text-dim);font-size:.72rem;
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-}
-.icon-btn:hover{color:var(--text);border-color:var(--text-faint);}
-.icon-btn svg{width:15px;height:15px;}
-
-main{padding:28px 34px;overflow-y:auto;}
-.main-header{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
-.main-title{font-family:'Fraunces',serif;font-size:1.5rem;font-weight:600;flex:1;min-width:180px;}
-.search-box{
-  display:flex;align-items:center;gap:8px;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius-sm);padding:9px 12px;
-  min-width:240px;flex:1;max-width:340px;
-}
-.search-box svg{width:15px;height:15px;stroke:var(--text-faint);flex-shrink:0;}
-.search-box input{background:none;border:none;outline:none;color:var(--text);width:100%;font-size:.85rem;}
-
-.doc-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
-  gap:14px;
-}
-.doc-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:16px;
-  cursor:pointer;transition:border-color .15s,transform .1s;
-  display:flex;flex-direction:column;gap:10px;
-}
-.doc-card:hover{border-color:var(--text-faint);transform:translateY(-1px);}
-.doc-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-.doc-icon{
-  width:38px;height:38px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  background:var(--surface-2);flex-shrink:0;
-  position:relative;overflow:hidden;
-}
-.doc-icon svg{width:18px;height:18px;stroke:var(--brass);}
-.doc-thumb{width:100%;height:100%;object-fit:cover;display:block;}
-.doc-icon-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
-.doc-name{font-weight:500;font-size:.9rem;line-height:1.3;word-break:break-word;}
-.doc-meta{font-size:.72rem;color:var(--text-faint);}
-.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px;}
-.tag{
-  font-size:.68rem;padding:3px 8px;border-radius:20px;
-  background:var(--surface-2);color:var(--text-dim);border:1px solid var(--border);
-}
-.tag.category{color:var(--brass);border-color:var(--brass-dim);}
-.badge-expiry{
-  font-size:.68rem;padding:3px 8px;border-radius:20px;
-  background:var(--danger-dim);color:var(--danger);border:1px solid var(--danger-dim);
-}
-.badge-expiry.warn{background:#3a3220;color:#d4a63a;border-color:#3a3220;}
-
-.empty-state{
-  text-align:center;padding:70px 20px;color:var(--text-faint);
-}
-.empty-state svg{width:40px;height:40px;stroke:var(--text-faint);margin-bottom:14px;}
-.empty-state h3{font-family:'Fraunces',serif;color:var(--text-dim);font-weight:600;margin-bottom:6px;font-size:1.1rem;}
-.empty-state p{font-size:.85rem;max-width:320px;margin:0 auto;}
-
-.fab{
-  position:fixed;bottom:28px;right:34px;
-  width:52px;height:52px;border-radius:50%;
-  background:var(--brass);border:none;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 8px 24px rgba(0,0,0,.4);
-  transition:transform .15s;
-}
-.fab:hover{transform:scale(1.06);}
-.fab svg{width:22px;height:22px;stroke:#1B1500;stroke-width:2.4;}
-
-/* ---------- Modal ---------- */
-.modal-overlay{
-  position:fixed;inset:0;background:rgba(8,10,14,.7);
-  display:none;align-items:center;justify-content:center;z-index:200;
-  padding:20px;backdrop-filter:blur(2px);
-}
-.modal-overlay.active{display:flex;}
-.modal{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);width:100%;max-width:480px;
-  max-height:88vh;overflow-y:auto;
-}
-.modal-header{
-  padding:20px 24px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.modal-header h2{font-family:'Fraunces',serif;font-size:1.15rem;font-weight:600;}
-.modal-close{background:none;border:none;color:var(--text-faint);font-size:1.3rem;line-height:1;}
-.modal-close:hover{color:var(--text);}
-.modal-body{padding:20px 24px;}
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:6px;}
-.field input, .field select, .field textarea{
-  width:100%;padding:10px 12px;background:var(--surface-2);
-  border:1px solid var(--border);border-radius:var(--radius-sm);
-  color:var(--text);font-size:.875rem;outline:none;
-}
-.field input:focus, .field select:focus, .field textarea:focus{border-color:var(--brass-dim);}
-.field textarea{resize:vertical;min-height:60px;}
-.field-hint{font-size:.7rem;color:var(--text-faint);margin-top:4px;}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
-.modal-footer{
-  padding:16px 24px;border-top:1px solid var(--border);
-  display:flex;justify-content:flex-end;gap:10px;
-}
-
-/* view modal specific */
-.view-file-preview{
-  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
-  padding:26px;text-align:center;margin-bottom:18px;
-}
-.view-file-preview .doc-icon{width:120px;height:120px;margin:0 auto 12px;border-radius:12px;}
-.view-file-preview .doc-icon-fallback svg{width:32px;height:32px;}
-.detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:.82rem;gap:12px;}
-.detail-row:last-child{border-bottom:none;}
-.detail-row span:first-child{color:var(--text-faint);flex-shrink:0;}
-.detail-row span:last-child{color:var(--text);text-align:right;overflow-wrap:anywhere;}
-.detail-row a{word-break:break-all;}
-
-.toast-wrap{position:fixed;bottom:24px;left:24px;z-index:300;display:flex;flex-direction:column;gap:8px;}
-.toast{
-  background:var(--surface-2);border:1px solid var(--border);color:var(--text);
-  padding:11px 16px;border-radius:var(--radius-sm);font-size:.82rem;
-  box-shadow:0 8px 20px rgba(0,0,0,.35);
-  animation:toastIn .2s ease;
-}
-.toast.success{border-color:var(--success);}
-.toast.error{border-color:var(--danger);}
-@keyframes toastIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-
-@media (max-width:760px){
-  #app.active{grid-template-columns:1fr;}
-  aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:14px 16px;}
-  .brand{border:none;margin:0;padding:0;flex:1;}
-  .nav-section{display:none;}
-  .sidebar-footer{display:none;}
-  main{padding:20px 16px 90px;}
-}
-@media (prefers-reduced-motion: reduce){
-  *{animation:none !important;transition:none !important;}
-}
+/* modais e portão */
+.ov{position:fixed;inset:0;background:rgba(5,3,1,.75);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.ov.on{display:flex}
+@media(min-width:600px){.ov{align-items:center;padding:20px}}
+.md,.gcard{background:linear-gradient(var(--parch),var(--parch2));border:2px solid var(--gold2);width:100%;max-width:480px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px #000;border-radius:14px 14px 0 0}
+@media(min-width:600px){.md{border-radius:14px}}
+.mh{padding:16px 20px 4px;font-family:Cinzel,serif;font-weight:700;font-size:1.1rem}
+.mb{padding:4px 20px 10px}
+.mf{padding:10px 20px 18px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+label{display:block;font-size:.9rem;color:var(--ink2);margin:12px 0 4px}
+input,select,textarea{width:100%;font:inherit;font-size:1.05rem;padding:10px 12px;background:#f6ecd0;border:1.5px solid var(--gold2);border-radius:8px;color:var(--ink);outline:0}
+input:focus,select:focus,textarea:focus{border-color:var(--blood)}
+textarea{resize:vertical;min-height:64px}
+.btn{font-size:1rem;padding:10px 18px;border-radius:8px;border:1.5px solid var(--gold2);background:var(--leather);color:var(--gold);cursor:pointer}
+.btn.pri{background:linear-gradient(#e0bd63,#b8903a);color:var(--ink);font-weight:600;border-color:#e8cd85}
+.btn.dng{color:#f0a89f;border-color:#7a2a22}
+.btn:disabled{opacity:.6}
+.act{display:block;width:100%;text-align:left;margin-top:8px}
+details summary{cursor:pointer;color:var(--ink2);margin-top:14px}
+.hint{font-size:.85rem;color:var(--ink2);margin-top:4px}
+.err{color:var(--blood);font-size:.9rem;min-height:1.2em;margin-top:8px}
+.gate{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 30%,#2c1d12,#0d0804);z-index:100}
+.gcard{border-radius:14px;padding:28px 24px;max-width:380px;text-align:center}
+.gcard svg.seal{font-size:46px;color:var(--gold2);margin-bottom:6px}
+.gcard h2{font-family:Cinzel,serif;font-size:1.3rem;margin-bottom:6px}
+.gcard p{color:var(--ink2);font-size:.98rem;margin-bottom:12px}
+.gcard input{margin-top:8px}
+.gcard .btn{width:100%;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--leather);color:var(--gold);border:1px solid var(--gold2);padding:10px 18px;border-radius:8px;z-index:200;max-width:90vw;text-align:center;box-shadow:0 6px 18px #000}
 </style>
 </head>
 <body>
 
-<!-- SETUP SCREEN (first run) -->
-<div id="setupScreen">
-  <div class="auth-card">
-    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/></svg></div>
-    <h1>Criar cofre</h1>
-    <p>Defina uma senha para proteger seu índice de documentos. Ela fica só neste navegador — não há como recuperá-la se for esquecida.</p>
-    <input type="password" id="setupPass1" placeholder="Nova senha" autocomplete="new-password">
-    <input type="password" id="setupPass2" placeholder="Confirmar senha" autocomplete="new-password">
-    <div class="auth-error" id="setupError"></div>
-    <button class="btn btn-primary" onclick="handleSetup()">Criar cofre</button>
+<!-- PORTÃO: criar senha / entrar / erro -->
+<div class="gate" id="gate">
+  <div class="gcard" id="pLoad"><svg class="seal" viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/></svg><p>Abrindo o cofre…</p></div>
+  <div class="gcard" id="pSetup" hidden>
+    <svg class="seal" viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/></svg>
+    <h2>Selar o cofre</h2>
+    <p>Escolha uma senha. Ela protege seus dados de verdade (criptografia) e vale em todos os dispositivos. <b>Se esquecer, não há como recuperar.</b></p>
+    <input type="password" id="sp1" placeholder="Senha (mín. 6 caracteres)" autocomplete="new-password">
+    <input type="password" id="sp2" placeholder="Repita a senha" autocomplete="new-password">
+    <div class="err" id="sErr"></div>
+    <button class="btn pri" id="sBtn">Criar cofre</button>
   </div>
-</div>
-
-<!-- LOCK SCREEN -->
-<div id="lockScreen" style="display:none;">
-  <div class="auth-card">
-    <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/></svg></div>
-    <h1>Cofre de Documentos</h1>
-    <p>Digite sua senha para acessar.</p>
-    <input type="password" id="lockPass" placeholder="Senha" autocomplete="current-password">
-    <div class="auth-error" id="lockError"></div>
-    <button class="btn btn-primary" onclick="handleUnlock()">Entrar</button>
-    <div class="auth-hint">Esqueceu a senha? <button onclick="showResetWarning()">Redefinir cofre</button></div>
+  <div class="gcard" id="pLock" hidden>
+    <svg class="seal" viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/></svg>
+    <h2>Cofre de Documentos</h2>
+    <p>Diga a senha para entrar.</p>
+    <input type="password" id="lp" placeholder="Senha" autocomplete="current-password">
+    <div class="err" id="lErr"></div>
+    <button class="btn pri" id="lBtn">Entrar</button>
+  </div>
+  <div class="gcard" id="pErr" hidden>
+    <svg class="seal" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.3 3.9 2.5 17a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+    <h2>Sem conexão</h2>
+    <p>Não consegui falar com o Supabase. Confira a internet e se a tabela foi criada.</p>
+    <button class="btn pri" onclick="location.reload()">Tentar novamente</button>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app">
-  <aside>
-    <div class="brand">
-      <div class="seal"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/></svg></div>
-      <div class="brand-text">Cofre<small>de Documentos</small></div>
-    </div>
-
-    <div class="nav-section">
-      <div class="nav-label">Biblioteca</div>
-      <div class="nav-item active" data-cat="__all__" onclick="setCategory('__all__')">
-        <span>Todos os documentos</span><span class="count" id="count-all">0</span>
-      </div>
-    </div>
-
-    <div class="nav-section" id="categoryNav">
-      <div class="nav-label">Categorias</div>
-      <!-- populated by JS -->
-    </div>
-
-    <div class="nav-section">
-      <div class="nav-label">Outros</div>
-      <div class="nav-item" data-cat="__trash__" onclick="setCategory('__trash__')">
-        <span>Lixeira</span><span class="count" id="count-trash">0</span>
-      </div>
-    </div>
-
-    <div class="sidebar-footer">
-      <div class="sidebar-footer-text" id="storageText">0 documentos indexados</div>
-      <div class="icon-btn-row">
-        <button class="icon-btn" onclick="exportBackup()" title="Exportar backup">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
-          Backup
-        </button>
-        <button class="icon-btn" onclick="document.getElementById('importInput').click()" title="Importar backup">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21V9m0 0-4 4m4-4 4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/></svg>
-          Importar
-        </button>
-      </div>
-      <input type="file" id="importInput" accept="application/json" style="display:none" onchange="handleImportFile(this.files[0])">
-      <div class="icon-btn-row">
-        <button class="icon-btn" onclick="lockNow()" title="Bloquear">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          Bloquear
-        </button>
-      </div>
-    </div>
-  </aside>
-
-  <main>
-    <div class="main-header">
-      <div class="main-title" id="viewTitle">Todos os documentos</div>
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-        <input type="text" id="searchInput" placeholder="Buscar por nome ou tag…" oninput="renderDocs()">
-      </div>
-    </div>
-
-    <div id="docGrid" class="doc-grid"></div>
-    <div id="emptyState" class="empty-state" style="display:none;"></div>
+<div id="app" hidden>
+  <header class="top">
+    <div class="brand"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/><path d="M9.5 12.5 11 14l3.5-3.5"/></svg><h1>Cofre de Documentos</h1></div>
+    <button class="ib" id="bDrive" title="Abrir meu Drive"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg></button>
+    <button class="ib" id="bSet" title="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button>
+    <button class="ib" id="bLock" title="Trancar"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></button>
+  </header>
+  <main class="wrap">
+    <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="q" type="search" placeholder="Procurar no cofre…" autocomplete="off"></div>
+    <nav class="chips" id="chips"></nav>
+    <div class="bar"><span id="count"></span><button class="lnk" id="orgBtn">Organizar</button></div>
+    <ul class="list" id="list"></ul>
+    <div class="empty" id="empty" hidden></div>
   </main>
-
-  <button class="fab" onclick="openAddModal()" title="Adicionar documento">
-    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-  </button>
+  <button class="fab" id="fab" title="Novo documento"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
 
-<!-- ADD/EDIT MODAL -->
-<div class="modal-overlay" id="editModalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 id="editModalTitle">Adicionar documento</h2>
-      <button class="modal-close" onclick="closeModal('editModalOverlay')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label>Link do documento</label>
-        <input type="url" id="docUrl" placeholder="https://drive.google.com/...">
-        <div class="field-hint">Cole o link de compartilhamento do Google Drive, OneDrive ou outro serviço em nuvem. O arquivo em si continua guardado lá — aqui fica só a referência.</div>
-      </div>
-      <div class="field">
-        <label>Nome do documento</label>
-        <input type="text" id="docName" placeholder="Ex: Certificado de Python Avançado">
-      </div>
-      <div class="two-col">
-        <div class="field">
-          <label>Categoria</label>
-          <select id="docCategory" onchange="handleCategorySelectChange()">
-            <option value="Certificados">Certificados</option>
-            <option value="Documentos Pessoais">Documentos Pessoais</option>
-            <option value="Materiais de Aula">Materiais de Aula</option>
-            <option value="Receitas">Receitas</option>
-            <option value="Outros">Outros</option>
-            <option value="__new__">+ Nova categoria…</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Validade (opcional)</label>
-          <input type="date" id="docExpiry">
-        </div>
-      </div>
-      <div class="field" id="newCategoryField" style="display:none;">
-        <label>Nome da nova categoria</label>
-        <input type="text" id="newCategoryInput" placeholder="Ex: Contratos">
-      </div>
-      <div class="field">
-        <label>Tags (separadas por vírgula)</label>
-        <input type="text" id="docTags" placeholder="python, backend, 2026">
-      </div>
-      <div class="field">
-        <label>Notas</label>
-        <textarea id="docNotes" placeholder="Observações, instituição emissora, número do documento…"></textarea>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal('editModalOverlay')">Cancelar</button>
-      <button class="btn btn-primary" style="width:auto;" onclick="saveDocument()">Salvar</button>
-    </div>
+<!-- Modal: novo/editar -->
+<div class="ov" id="mEdit"><div class="md">
+  <div class="mh" id="eTitle">Novo pergaminho</div>
+  <div class="mb">
+    <label>Link do documento (Drive etc.)</label>
+    <input type="url" id="eUrl" placeholder="https://drive.google.com/…" inputmode="url">
+    <button class="lnk" type="button" id="eDrive" style="padding-left:0">Abrir meu Drive para copiar o link ↗</button>
+    <label>Nome</label>
+    <input type="text" id="eName" placeholder="Ex: Diploma de Engenharia">
+    <label>Categoria</label>
+    <select id="eCat"></select>
+    <input type="text" id="eNew" placeholder="Nome da nova categoria" hidden style="margin-top:8px">
+    <details><summary>Mais opções</summary>
+      <label>Validade</label><input type="date" id="eExp">
+      <label>Tags (separadas por vírgula)</label><input type="text" id="eTags" placeholder="cpf, trabalho, 2026">
+      <label>Notas</label><textarea id="eNotes" placeholder="Número, órgão emissor…"></textarea>
+    </details>
   </div>
-</div>
+  <div class="mf"><button class="btn" data-close="mEdit">Cancelar</button><button class="btn pri" id="eSave">Guardar</button></div>
+</div></div>
 
-<!-- VIEW MODAL -->
-<div class="modal-overlay" id="viewModalOverlay">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>Detalhes</h2>
-      <button class="modal-close" onclick="closeModal('viewModalOverlay')">&times;</button>
-    </div>
-    <div class="modal-body" id="viewModalBody"></div>
-    <div class="modal-footer" id="viewModalFooter"></div>
+<!-- Modal: ações -->
+<div class="ov" id="mAct"><div class="md">
+  <div class="mh" id="aTitle"></div>
+  <div class="mb" id="aBody"></div>
+  <div class="mf"><button class="btn" data-close="mAct">Fechar</button></div>
+</div></div>
+
+<!-- Modal: ajustes -->
+<div class="ov" id="mSet"><div class="md">
+  <div class="mh">Ajustes</div>
+  <div class="mb">
+    <label>Link padrão do Drive (pasta inicial)</label>
+    <input type="url" id="sDrive" placeholder="https://drive.google.com/drive/folders/…" inputmode="url">
+    <button class="btn act" id="sDriveSave">Salvar link do Drive</button>
+    <hr style="border:0;border-top:1px dashed var(--gold2);margin:16px 0 4px">
+    <button class="btn act" id="sPw">Trocar senha</button>
+    <button class="btn act" id="sExp">Exportar cópia (JSON)</button>
+    <button class="btn act" id="sImp">Importar cópia</button>
+    <div class="hint">A cópia exportada sai sem criptografia — guarde em local seguro.</div>
+    <input type="file" id="sFile" accept="application/json" hidden>
   </div>
-</div>
+  <div class="mf"><button class="btn" data-close="mSet">Fechar</button></div>
+</div></div>
 
-<div class="toast-wrap" id="toastWrap"></div>
+<!-- Modal: trocar senha -->
+<div class="ov" id="mPw"><div class="md">
+  <div class="mh">Trocar senha</div>
+  <div class="mb">
+    <label>Senha atual</label><input type="password" id="pw0" autocomplete="current-password">
+    <label>Nova senha</label><input type="password" id="pw1" autocomplete="new-password">
+    <label>Repita a nova senha</label><input type="password" id="pw2" autocomplete="new-password">
+    <div class="err" id="pwErr"></div>
+  </div>
+  <div class="mf"><button class="btn" data-close="mPw">Cancelar</button><button class="btn pri" id="pwSave">Trocar</button></div>
+</div></div>
+
+<div class="toast" id="toast" hidden></div>
 
 <script>
 /* =========================================================
-   COFRE DE DOCUMENTOS — app autocontido (Supabase + senha)
+   COFRE DE DOCUMENTOS — Supabase + criptografia no navegador
    ---------------------------------------------------------
-   Cada documento é uma REFERÊNCIA (link para um armazenamento
-   em nuvem — Drive, OneDrive etc.), não o arquivo em si. Isso
-   mantém o cofre leve e evita duplicar arquivos que já moram
-   em outro lugar seguro.
-
-   Os dados ficam numa tabela isolada no Supabase
-   (cofre_documentos_store) para não interferir em outras
-   tabelas do mesmo projeto. Veja cofre-documentos-schema.sql
-   para criar a tabela.
-
-   Camada de dados isolada em DataStore — trocar de backend no
-   futuro (ex: outro projeto Supabase) significa só reescrever
-   estes métodos, mantendo a mesma assinatura.
+   • Cada documento é só um LINK (Drive etc.).
+   • Nome, link, categoria, tags e notas são cifrados (AES-GCM)
+     ANTES de ir ao Supabase. Quem pegar a chave anon vê só lixo.
+   • A senha protege uma chave mestra aleatória (DEK) guardada
+     cifrada numa linha de configuração. Trocar a senha só
+     reembrulha a chave — nada é recifrado, nada se perde.
+   • Mesma senha em todos os dispositivos.
    ========================================================= */
+const SB_URL='https://cfdzwduajsatbydphrtq.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmZHp3ZHVhanNhdGJ5ZHBocnRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzQ2MDIsImV4cCI6MjA5MzQxMDYwMn0.zUB9rASXCXxKVJFfvXrfcMCivQ3fPV4AE0Jvo4hCamQ';
+const T='cofre_documentos_store', CFG_CAT='__config__';
+const BASE=['Certificados','Documentos Pessoais','Materiais de Aula','Receitas','Outros'];
+const sb=window.supabase.createClient(SB_URL,SB_KEY);
+const $=id=>document.getElementById(id);
 
-const SUPABASE_URL = 'https://cfdzwduajsatbydphrtq.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmZHp3ZHVhanNhdGJ5ZHBocnRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzQ2MDIsImV4cCI6MjA5MzQxMDYwMn0.zUB9rASXCXxKVJFfvXrfcMCivQ3fPV4AE0Jvo4hCamQ';
-const TABLE = 'cofre_documentos_store';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* ---------------- Supabase layer (DataStore) ---------------- */
-function rowToDoc(r){
-  return {
-    id: r.id, name: r.name, category: r.category, url: r.url,
-    tags: r.tags || [], notes: r.notes || '',
-    expiryDate: r.expiry_date, addedDate: r.added_date,
-    deleted: r.deleted, deletedAt: r.deleted_at
-  };
+/*CRYPTO_START*/
+const enc=new TextEncoder(), dec=new TextDecoder();
+const b64e=u=>{let s='';u.forEach(c=>s+=String.fromCharCode(c));return btoa(s)};
+const b64d=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function deriveKey(pw,salt){
+  const base=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
-function docToRow(d){
-  const row = {
-    name: d.name, category: d.category, url: d.url,
-    tags: d.tags || [], notes: d.notes || '',
-    expiry_date: d.expiryDate || null, added_date: d.addedDate,
-    deleted: !!d.deleted, deleted_at: d.deletedAt || null
-  };
-  if(d.id) row.id = d.id;
-  return row;
+const importDek=raw=>crypto.subtle.importKey('raw',raw,'AES-GCM',true,['encrypt','decrypt']);
+async function encStr(str,key){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(str)));
+  return 'enc1:'+b64e(iv)+':'+b64e(ct);
 }
+async function decStr(s,key){
+  const [,iv,ct]=s.split(':');
+  return dec.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:b64d(iv)},key,b64d(ct)));
+}
+/*CRYPTO_END*/
 
-const DataStore = {
-  async init(){
-    // Checagem simples de conectividade — lança erro se a tabela/projeto não responder.
-    const { error } = await supabaseClient.from(TABLE).select('id').limit(1);
-    if(error) throw error;
-    return true;
-  },
-  async getAll(){
-    const { data, error } = await supabaseClient
-      .from(TABLE).select('*').order('added_date', {ascending:false});
-    if(error) throw error;
-    return (data || []).map(rowToDoc);
-  },
-  async put(doc){
-    if(!doc.id) doc.id = crypto.randomUUID();
-    const { data, error } = await supabaseClient
-      .from(TABLE).upsert(docToRow(doc)).select().single();
-    if(error) throw error;
-    return rowToDoc(data);
-  },
-  async deleteHard(id){
-    const { error } = await supabaseClient.from(TABLE).delete().eq('id', id);
-    if(error) throw error;
-  }
+/* ---------- estado ---------- */
+let dek=null,cfgRow=null,cfg=null,hasSort=false,docs=[],view='__all__',orgMode=false,editId=null,drive='',loadFail=false;
+const today=()=>new Date().toLocaleDateString('sv');
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3200)}
+const openM=id=>$(id).classList.add('on'), closeM=id=>$(id).classList.remove('on');
+function gate(w){$('app').hidden=true;$('gate').hidden=false;['pLoad','pSetup','pLock','pErr'].forEach(p=>$(p).hidden=p!==w)}
+function normUrl(u){u=u.trim();if(u&&!/^https?:\/\//i.test(u))u='https://'+u;try{new URL(u);return u}catch(e){return ''}}
+
+/* ---------- ícones por categoria ---------- */
+const IC={
+ 'certificados':'<circle cx="12" cy="8" r="5"/><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5"/>',
+ 'documentos pessoais':'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="12" r="2"/><path d="M6.3 16.8c.3-1.6 1.6-2.8 3.2-2.8s2.9 1.2 3.2 2.8M14.5 10h4M14.5 14h4"/>',
+ 'materiais de aula':'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5V4.5Z"/><path d="M20 19H6.5A2.5 2.5 0 0 0 4 21.5M8 7h8M8 10.5h8"/>',
+ 'receitas':'<path d="M7.5 2v7a2 2 0 1 0 4 0V2M9.5 9v13M16.5 2c-1.8 1.2-2.5 3.4-2.5 5.5 0 1.8 1 3 2 3.3V22"/>',
+ 'contratos':'<path d="M8 3h8l4 4v14H4V3h4Z"/><path d="M16 3v4h4M9 12h6M9 15.5h6"/>',
+ 'saude':'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"/><path d="M12 8v6M9 11h6"/>',
+ 'financeiro':'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2 2 0 0 1 2-1.5h1a2 2 0 0 1 0 4h-1a2 2 0 0 0 0 4h1a2 2 0 0 0 2-1.5"/>',
+ '_':'<path d="M9 15l6-6M10.5 6.5l1-1a4 4 0 1 1 6 6l-1 1M13.5 17.5l-1 1a4 4 0 1 1-6-6l1-1"/>'
 };
+const icon=c=>`<svg viewBox="0 0 24 24">${IC[norm(c).trim()]||IC._}</svg>`;
+const GRIP='<svg viewBox="0 0 24 24"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" stroke-width="3"/></svg>';
+const DOTS='<svg viewBox="0 0 24 24"><path d="M12 5h.01M12 12h.01M12 19h.01" stroke-width="3"/></svg>';
 
-/* ---------------- State ---------------- */
-let allDocs = [];
-let currentCategory = '__all__';
-let editingDocId = null;
-let customCategories = JSON.parse(localStorage.getItem('cofre_custom_categories') || '[]');
-
-/* ---------------- Crypto (password gate) ---------------- */
-async function sha256Hex(str){
-  const enc = new TextEncoder().encode(str);
-  const buf = await crypto.subtle.digest('SHA-256', enc);
-  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+/* ---------- dados ---------- */
+async function loadCfg(){
+  const {data,error}=await sb.from(T).select('*').eq('category',CFG_CAT).limit(1);
+  if(error) throw error;
+  if(!data.length){cfgRow=null;cfg=null;return}
+  cfgRow=data[0];cfg=JSON.parse(cfgRow.notes);hasSort='sort_order' in cfgRow;
 }
-function randomSalt(){
-  const arr = new Uint8Array(16);
-  crypto.getRandomValues(arr);
-  return Array.from(arr).map(b=>b.toString(16).padStart(2,'0')).join('');
+async function saveCfg(n){
+  const {error}=await sb.from(T).update({notes:JSON.stringify(n)}).eq('id',cfgRow.id);
+  if(error) throw error;cfg=n;
 }
-
-async function handleSetup(){
-  const p1 = document.getElementById('setupPass1').value;
-  const p2 = document.getElementById('setupPass2').value;
-  const err = document.getElementById('setupError');
-  err.textContent = '';
-  if(p1.length < 4){ err.textContent = 'Use pelo menos 4 caracteres.'; return; }
-  if(p1 !== p2){ err.textContent = 'As senhas não coincidem.'; return; }
-  const salt = randomSalt();
-  const hash = await sha256Hex(salt + p1);
-  localStorage.setItem('cofre_salt', salt);
-  localStorage.setItem('cofre_hash', hash);
-  sessionStorage.setItem('cofre_unlocked', '1');
-  document.getElementById('setupScreen').style.display = 'none';
-  startApp();
+async function encodeRow(d){
+  const p={name:d.name,category:d.category,url:d.url,tags:d.tags||[],notes:d.notes||'',expiryDate:d.expiryDate||null};
+  const r={id:d.id,name:'🔒',category:'🔒',url:'🔒',tags:[],notes:await encStr(JSON.stringify(p),dek),expiry_date:null,
+    added_date:d.addedDate,deleted:!!d.deleted,deleted_at:d.deletedAt||null};
+  if(hasSort) r.sort_order=d.sortOrder??0;
+  return r;
 }
-
-async function handleUnlock(){
-  const pass = document.getElementById('lockPass').value;
-  const err = document.getElementById('lockError');
-  const salt = localStorage.getItem('cofre_salt');
-  const storedHash = localStorage.getItem('cofre_hash');
-  const hash = await sha256Hex(salt + pass);
-  if(hash === storedHash){
-    sessionStorage.setItem('cofre_unlocked', '1');
-    document.getElementById('lockScreen').style.display = 'none';
-    startApp();
-  } else {
-    err.textContent = 'Senha incorreta.';
+async function decodeRow(r){
+  const b={id:r.id,addedDate:r.added_date,deleted:r.deleted,deletedAt:r.deleted_at,_so:r.sort_order??null,tags:[],notes:''};
+  if(r.notes&&r.notes.startsWith('enc1:')){
+    try{return {...b,...JSON.parse(await decStr(r.notes,dek))}}
+    catch(e){return {...b,name:'⚠ Item ilegível',category:'Outros',url:''}}
+  }
+  return {...b,name:r.name,category:r.category,url:r.url,tags:r.tags||[],notes:r.notes||'',expiryDate:r.expiry_date,_legacy:true};
+}
+async function putMany(list){
+  for(let i=0;i<list.length;i+=40){
+    const chunk=list.slice(i,i+40);
+    const rows=await Promise.all(chunk.map(encodeRow));
+    const {error}=await sb.from(T).upsert(rows);
+    if(error) throw error;
+  }
+  list.forEach(d=>{d._so=hasSort?d.sortOrder:null;d._legacy=false});
+}
+function normalize(){
+  const loc=hasSort?null:JSON.parse(localStorage.getItem('cofre_order')||'[]');
+  const k=d=>hasSort?(d._so??1e9):(loc.includes(d.id)?loc.indexOf(d.id):-1);
+  docs.sort((a,b)=>k(a)-k(b)||(b.addedDate||'').localeCompare(a.addedDate||''));
+  docs.forEach((d,i)=>d.sortOrder=i);
+}
+async function refresh(first){
+  loadFail=false;
+  try{
+    const {data,error}=await sb.from(T).select('*').neq('category',CFG_CAT);
+    if(error) throw error;
+    docs=await Promise.all(data.map(decodeRow));normalize();
+  }catch(e){console.error(e);loadFail=true}
+  render();
+  if(first&&!loadFail){
+    const leg=docs.filter(d=>d._legacy);
+    if(leg.length){try{await putMany(leg);toast(leg.length+' documento(s) agora protegido(s) por senha.')}catch(e){console.error(e)}}
   }
 }
 
-function lockNow(){
-  sessionStorage.removeItem('cofre_unlocked');
-  location.reload();
+/* ---------- acesso: criar / entrar / trancar ---------- */
+async function boot(){
+  try{await loadCfg()}catch(e){console.error(e);return gate('pErr')}
+  if(!cfg) return gate('pSetup');
+  const sk=sessionStorage.getItem('cofre_k');
+  if(sk){try{dek=await importDek(b64d(sk));await decStr(cfg.extra,dek);return startApp()}catch(e){sessionStorage.removeItem('cofre_k');dek=null}}
+  gate('pLock');$('lp').focus();
 }
-
-function showResetWarning(){
-  const ok = confirm(
-    'Redefinir o cofre apaga a senha atual, mas o índice de documentos continua salvo no navegador. ' +
-    'Depois de redefinir, você poderá criar uma nova senha e os documentos existentes permanecerão. ' +
-    'Deseja continuar?'
-  );
-  if(ok){
-    localStorage.removeItem('cofre_salt');
-    localStorage.removeItem('cofre_hash');
-    sessionStorage.removeItem('cofre_unlocked');
-    location.reload();
-  }
+async function doSetup(){
+  const a=$('sp1').value,b=$('sp2').value,e=$('sErr'),btn=$('sBtn');e.textContent='';
+  if(a.length<6){e.textContent='Use pelo menos 6 caracteres.';return}
+  if(a!==b){e.textContent='As senhas não coincidem.';return}
+  btn.disabled=true;btn.textContent='Selando…';
+  try{
+    const raw=crypto.getRandomValues(new Uint8Array(32)),salt=crypto.getRandomValues(new Uint8Array(16));
+    dek=await importDek(raw);const kek=await deriveKey(a,salt);
+    const c={v:2,salt:b64e(salt),wrapped:await encStr(b64e(raw),kek),extra:await encStr(JSON.stringify({drive:''}),dek)};
+    const {error}=await sb.from(T).insert({name:'config',category:CFG_CAT,url:'config',tags:[],notes:JSON.stringify(c),added_date:today()});
+    if(error) throw error;
+    sessionStorage.setItem('cofre_k',b64e(raw));
+    await loadCfg();await startApp();
+  }catch(err){console.error(err);e.textContent='Falha ao criar o cofre. Confira a conexão e a tabela.';btn.disabled=false;btn.textContent='Criar cofre'}
 }
-
-function checkAuthOnLoad(){
-  const hasPassword = !!localStorage.getItem('cofre_hash');
-  if(!hasPassword){
-    document.getElementById('setupScreen').style.display = 'flex';
-    return;
-  }
-  if(sessionStorage.getItem('cofre_unlocked') === '1'){
-    startApp();
-  } else {
-    document.getElementById('lockScreen').style.display = 'flex';
-  }
+async function doUnlock(){
+  const e=$('lErr'),btn=$('lBtn');e.textContent='';
+  btn.disabled=true;btn.textContent='Abrindo…';
+  try{
+    const kek=await deriveKey($('lp').value,b64d(cfg.salt));
+    const raw=b64d(await decStr(cfg.wrapped,kek));
+    dek=await importDek(raw);sessionStorage.setItem('cofre_k',b64e(raw));
+    $('lp').value='';await startApp();
+  }catch(err){e.textContent='Senha incorreta.'}
+  btn.disabled=false;btn.textContent='Entrar';
 }
-
-/* ---------------- App bootstrap ---------------- */
-let isLoading = true;
-let loadError = false;
-
+function lockNow(){sessionStorage.removeItem('cofre_k');location.reload()}
+function armIdle(){
+  let t;const r=()=>{clearTimeout(t);t=setTimeout(lockNow,10*60*1000)};
+  ['pointerdown','keydown','scroll'].forEach(ev=>addEventListener(ev,r,{passive:true}));r();
+}
 async function startApp(){
-  document.getElementById('app').classList.add('active');
-  renderDocs();
-  try{
-    await DataStore.init();
-    allDocs = await DataStore.getAll();
-    isLoading = false;
-  }catch(err){
-    console.error(err);
-    isLoading = false;
-    loadError = true;
-    showToast('Não foi possível conectar ao Supabase. Verifique sua internet e a configuração da tabela.', 'error');
+  $('gate').hidden=true;$('app').hidden=false;
+  try{drive=JSON.parse(await decStr(cfg.extra,dek)).drive||''}catch(e){drive=''}
+  $('count').textContent='Abrindo o cofre…';
+  await refresh(true);armIdle();
+}
+
+/* ---------- renderização ---------- */
+function catNames(){
+  const used=[...new Set(docs.filter(d=>!d.deleted).map(d=>d.category))];
+  return [...BASE.filter(c=>used.includes(c)),...used.filter(c=>!BASE.includes(c)).sort()];
+}
+function expTag(d){
+  if(!d.expiryDate) return '';
+  const n=Math.round((new Date(d.expiryDate+'T00:00:00')-new Date(new Date().toDateString()))/864e5);
+  if(n<0) return '<span class="warn">vencido</span>';
+  if(n<=30) return `<span class="warn">vence em ${n}d</span>`;
+  return '';
+}
+function render(){
+  const terms=norm($('q').value).trim().split(/\s+/).filter(Boolean);
+  document.body.classList.toggle('searching',terms.length>0);
+  const live=docs.filter(d=>!d.deleted),trash=docs.filter(d=>d.deleted);
+  const cats=catNames();
+  if(view!=='__all__'&&view!=='__trash__'&&!cats.includes(view)) view='__all__';
+  if(view==='__trash__'&&!trash.length) view='__all__';
+  $('chips').innerHTML=[['__all__','Todos'],...cats.map(c=>[c,c]),...(trash.length?[['__trash__','Lixeira']]:[])]
+    .map(([v,l])=>`<button class="chip${v===view?' on':''}" data-v="${esc(v)}">${esc(l)}</button>`).join('');
+  let list;
+  if(view==='__trash__') list=[...trash].sort((a,b)=>(b.deletedAt||'').localeCompare(a.deletedAt||''));
+  else{
+    list=(terms.length||view==='__all__')?live:live.filter(d=>d.category===view);
+    list=[...list].sort((a,b)=>a.sortOrder-b.sortOrder);
   }
-  renderCategoryNav();
-  renderDocs();
-  updateFooterCount();
+  if(terms.length) list=list.filter(d=>{const h=norm([d.name,d.category,(d.tags||[]).join(' '),d.notes].join(' '));return terms.every(t=>h.includes(t))});
+  const showCat=view==='__all__'||view==='__trash__'||terms.length>0;
+  $('list').className='list'+(orgMode&&view!=='__trash__'?' org':'');
+  $('list').innerHTML=list.map(d=>{
+    const sub=[showCat?esc(d.category):'',expTag(d)].filter(Boolean).join(' · ');
+    return `<li class="row" data-id="${d.id}"><span class="grip">${GRIP}</span>
+      <button class="rmain" data-a="${view==='__trash__'?'more':'open'}"><span class="ico">${icon(d.category)}</span>
+      <span class="txt"><b>${esc(d.name)}</b>${sub?`<small>${sub}</small>`:''}</span></button>
+      <button class="more" data-a="more" aria-label="Opções">${DOTS}</button></li>`}).join('');
+  $('list').hidden=!list.length;
+  const em=$('empty');em.hidden=!!list.length;
+  if(loadFail) em.innerHTML='Não consegui carregar os documentos.<br><button class="lnk" onclick="refresh()">Tentar de novo</button>';
+  else if(!docs.length) em.textContent='O cofre está vazio. Toque no + para guardar o primeiro pergaminho.';
+  else em.textContent=terms.length?'Nada encontrado.':'Nenhum documento aqui.';
+  $('count').textContent=loadFail?'':terms.length?`${list.length} encontrado${list.length===1?'':'s'}`:`${list.length} documento${list.length===1?'':'s'}`;
+  $('orgBtn').hidden=view==='__trash__'||list.length<2;
+  $('orgBtn').textContent=orgMode?'Concluir':'Organizar';
 }
 
-async function reloadDocs(){
-  try{
-    allDocs = await DataStore.getAll();
-    loadError = false;
-  }catch(err){
-    console.error(err);
-    showToast('Falha ao atualizar do Supabase.', 'error');
-  }
-  renderCategoryNav();
-  renderDocs();
-  updateFooterCount();
+/* ---------- ações ---------- */
+const find=id=>docs.find(d=>d.id===id);
+function openDoc(id){const d=find(id);if(d&&d.url)window.open(d.url,'_blank','noopener')}
+function openDrive(){if(drive)window.open(drive,'_blank','noopener');else{openSettings();toast('Defina aqui o link padrão do Drive.')}}
+function openActions(id){
+  const d=find(id);if(!d)return;
+  $('aTitle').textContent=d.name;
+  $('aBody').innerHTML=d.deleted
+    ?`<button class="btn act" onclick="restoreDoc('${id}')">Restaurar</button><button class="btn act dng" onclick="purgeDoc('${id}')">Excluir para sempre</button>`
+    :`<button class="btn act" onclick="closeM('mAct');openDoc('${id}')">Abrir</button>
+      <button class="btn act" onclick="copyLink('${id}')">Copiar link</button>
+      <button class="btn act" onclick="editDoc('${id}')">Editar</button>
+      <button class="btn act dng" onclick="trashDoc('${id}')">Mover para a lixeira</button>`;
+  openM('mAct');
+}
+async function copyLink(id){
+  const d=find(id);closeM('mAct');
+  try{await navigator.clipboard.writeText(d.url);toast('Link copiado.')}catch(e){toast('Não consegui copiar.')}
+}
+function fillCats(sel){
+  const all=[...new Set([...BASE,...catNames()])];
+  $('eCat').innerHTML=all.map(c=>`<option>${esc(c)}</option>`).join('')+'<option value="__new__">+ Nova categoria…</option>';
+  $('eCat').value=all.includes(sel)?sel:all[0];$('eNew').hidden=true;$('eNew').value='';
+}
+function newDoc(){
+  editId=null;$('eTitle').textContent='Novo pergaminho';
+  ['eUrl','eName','eExp','eTags','eNotes'].forEach(i=>$(i).value='');
+  fillCats(BASE.includes(view)||catNames().includes(view)?view:'');
+  document.querySelector('#mEdit details').open=false;openM('mEdit');$('eUrl').focus();
+}
+function editDoc(id){
+  const d=find(id);closeM('mAct');editId=id;$('eTitle').textContent='Editar pergaminho';
+  $('eUrl').value=d.url;$('eName').value=d.name;$('eExp').value=d.expiryDate||'';
+  $('eTags').value=(d.tags||[]).join(', ');$('eNotes').value=d.notes||'';
+  fillCats(d.category);document.querySelector('#mEdit details').open=!!(d.expiryDate||d.tags.length||d.notes);openM('mEdit');
+}
+async function saveDoc(){
+  const url=normUrl($('eUrl').value),name=$('eName').value.trim();
+  if(!url||!name){toast('Informe um link válido e um nome.');return}
+  let cat=$('eCat').value;
+  if(cat==='__new__'){cat=$('eNew').value.trim();if(!cat){toast('Dê um nome à categoria.');return}}
+  const data={url,name,category:cat,expiryDate:$('eExp').value||null,
+    tags:$('eTags').value.split(',').map(s=>s.trim()).filter(Boolean),notes:$('eNotes').value.trim()};
+  const isNew=!editId;
+  const d=isNew?{id:crypto.randomUUID(),addedDate:today(),deleted:false,deletedAt:null,_so:null,sortOrder:Math.min(0,...docs.map(x=>x.sortOrder))-1}:find(editId);
+  const bk={...d};Object.assign(d,data);
+  $('eSave').disabled=true;
+  try{await putMany([d]);if(isNew)docs.push(d);closeM('mEdit');render();toast('Guardado no cofre.')}
+  catch(e){console.error(e);Object.assign(d,bk);toast('Falha ao salvar. Tente de novo.')}
+  $('eSave').disabled=false;
+}
+async function setDeleted(id,val,msg){
+  const d=find(id),bk={deleted:d.deleted,deletedAt:d.deletedAt};
+  d.deleted=val;d.deletedAt=val?new Date().toISOString():null;
+  try{await putMany([d]);closeM('mAct');render();toast(msg)}
+  catch(e){console.error(e);Object.assign(d,bk);toast('Falha ao atualizar.')}
+}
+const trashDoc=id=>setDeleted(id,true,'Movido para a lixeira.');
+const restoreDoc=id=>setDeleted(id,false,'Documento restaurado.');
+async function purgeDoc(id){
+  if(!confirm('Excluir para sempre? (O arquivo no Drive não é afetado.)'))return;
+  const {error}=await sb.from(T).delete().eq('id',id);
+  if(error){toast('Falha ao excluir.');return}
+  docs=docs.filter(d=>d.id!==id);closeM('mAct');render();toast('Excluído.');
 }
 
-/* ---------------- Categories & icons ---------------- */
-function getAllCategoryNames(){
-  const base = ['Certificados','Documentos Pessoais','Materiais de Aula','Receitas','Outros'];
-  const fromDocs = allDocs.filter(d=>!d.deleted).map(d=>d.category);
-  return Array.from(new Set([...base, ...customCategories, ...fromDocs]));
-}
-
-function normalizeCat(str){
-  return String(str||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-}
-
-// Ícones por categoria — chave normalizada (minúscula, sem acento) -> conteúdo SVG interno
-const CATEGORY_ICONS = {
-  'certificados': '<circle cx="12" cy="8" r="5"/><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5"/>',
-  'documentos pessoais': '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="12" r="2"/><path d="M6.3 16.8c.3-1.6 1.6-2.8 3.2-2.8s2.9 1.2 3.2 2.8M14.5 10h4M14.5 14h4"/>',
-  'materiais de aula': '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5V4.5Z"/><path d="M20 19H6.5A2.5 2.5 0 0 0 4 21.5"/><path d="M8 7h8M8 10.5h8"/>',
-  'receitas': '<path d="M7.5 2v7a2 2 0 1 0 4 0V2M9.5 9v13M16.5 2c-1.8 1.2-2.5 3.4-2.5 5.5 0 1.8 1 3 2 3.3V22"/>',
-  'contratos': '<path d="M8 3h8l4 4v14H4V3h4Z"/><path d="M16 3v4h4M9 12h6M9 15.5h6M9 8.5h3"/>',
-  'saude': '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z"/><path d="M12 8v6M9 11h6"/>',
-  'financeiro': '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2 2 0 0 1 2-1.5h1a2 2 0 0 1 0 4h-1a2 2 0 0 0 0 4h1a2 2 0 0 0 2-1.5"/>',
-  '__default__': '<path d="M9 15l6-6M10.5 6.5l1-1a4 4 0 1 1 6 6l-1 1M13.5 17.5l-1 1a4 4 0 1 1-6-6l1-1"/>'
-};
-
-function categoryIconSvg(category){
-  const key = normalizeCat(category);
-  const inner = CATEGORY_ICONS[key] || CATEGORY_ICONS['__default__'];
-  return `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6">${inner}</svg>`;
-}
-
-/* ---------------- Pré-visualização (thumbnail) para links do Google Drive ---------------- */
-function extractDriveFileId(url){
-  try{
-    const u = new URL(url);
-    if(!/(^|\.)(drive|docs)\.google\.com$/.test(u.hostname)) return null;
-    let m = u.pathname.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if(m) return m[1];
-    const idParam = u.searchParams.get('id');
-    if(idParam) return idParam;
-    return null;
-  }catch(e){ return null; }
-}
-function driveThumbnailUrl(fileId, size){
-  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
-}
-// Monta o conteúdo do .doc-icon: thumbnail do Drive quando possível, com
-// fallback automático (onerror) para o ícone da categoria.
-function docIconHtml(doc, size){
-  const driveId = extractDriveFileId(doc.url);
-  const fallback = `<div class="doc-icon-fallback">${categoryIconSvg(doc.category)}</div>`;
-  if(!driveId) return fallback;
-  const img = `<img src="${driveThumbnailUrl(driveId, size)}" alt="" class="doc-thumb" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
-  return img + `<div class="doc-icon-fallback" style="display:none;">${categoryIconSvg(doc.category)}</div>`;
-}
-
-function renderCategoryNav(){
-  const nav = document.getElementById('categoryNav');
-  const cats = getAllCategoryNames();
-  nav.innerHTML = '<div class="nav-label">Categorias</div>' + cats.map(cat=>{
-    const count = allDocs.filter(d=>!d.deleted && d.category===cat).length;
-    const active = currentCategory===cat ? 'active' : '';
-    return `<div class="nav-item ${active}" data-cat="${escapeHtml(cat)}" onclick="setCategory('${escapeAttr(cat)}')">
-      <span class="nav-item-label"><svg class="nav-item-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.6">${CATEGORY_ICONS[normalizeCat(cat)]||CATEGORY_ICONS['__default__']}</svg><span>${escapeHtml(cat)}</span></span>
-      <span class="count">${count}</span>
-    </div>`;
-  }).join('');
-
-  // update select options in modal too
-  const select = document.getElementById('docCategory');
-  const currentVal = select.value;
-  select.innerHTML = cats.map(c=>`<option value="${escapeAttr(c)}">${escapeHtml(c)}</option>`).join('') +
-    '<option value="__new__">+ Nova categoria…</option>';
-  if(cats.includes(currentVal)) select.value = currentVal;
-}
-
-function setCategory(cat){
-  currentCategory = cat;
-  document.querySelectorAll('.nav-item').forEach(el=>{
-    el.classList.toggle('active', el.dataset.cat === cat);
-  });
-  const titles = {'__all__':'Todos os documentos', '__trash__':'Lixeira'};
-  document.getElementById('viewTitle').textContent = titles[cat] || cat;
-  renderDocs();
-}
-
-/* ---------------- Rendering ---------------- */
-function daysUntil(dateStr){
-  const today = new Date(); today.setHours(0,0,0,0);
-  const target = new Date(dateStr + 'T00:00:00');
-  return Math.round((target-today)/86400000);
-}
-
-function linkHost(url){
-  try{ return new URL(url).hostname.replace(/^www\./,''); }
-  catch(e){ return ''; }
-}
-
-function renderDocs(){
-  const grid = document.getElementById('docGrid');
-  const empty = document.getElementById('emptyState');
-  const search = document.getElementById('searchInput').value.trim().toLowerCase();
-
-  let docs;
-  if(currentCategory === '__trash__'){
-    docs = allDocs.filter(d=>d.deleted);
-  } else if(currentCategory === '__all__'){
-    docs = allDocs.filter(d=>!d.deleted);
-  } else {
-    docs = allDocs.filter(d=>!d.deleted && d.category===currentCategory);
-  }
-
-  if(search){
-    docs = docs.filter(d=>
-      d.name.toLowerCase().includes(search) ||
-      (d.tags||[]).some(t=>t.toLowerCase().includes(search)) ||
-      (d.notes||'').toLowerCase().includes(search)
-    );
-  }
-
-  docs = docs.slice().sort((a,b)=> (b.addedDate||'').localeCompare(a.addedDate||''));
-
-  document.getElementById('count-all').textContent = allDocs.filter(d=>!d.deleted).length;
-  document.getElementById('count-trash').textContent = allDocs.filter(d=>d.deleted).length;
-
-  if(isLoading){
-    grid.style.display = 'none';
-    empty.style.display = 'block';
-    empty.innerHTML = `<h3>Carregando…</h3><p>Buscando seus documentos no Supabase.</p>`;
-    return;
-  }
-  if(loadError){
-    grid.style.display = 'none';
-    empty.style.display = 'block';
-    empty.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 9v4m0 4h.01M10.3 3.9 2.5 17a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
-        <h3>Sem conexão com o cofre</h3><p>Não foi possível carregar os documentos do Supabase agora.</p>
-        <button class="btn" style="margin-top:14px;" onclick="reloadDocs()">Tentar novamente</button>`;
-    return;
-  }
-  if(docs.length === 0){
-    grid.style.display = 'none';
-    empty.style.display = 'block';
-    empty.innerHTML = currentCategory==='__trash__'
-      ? `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          <h3>Lixeira vazia</h3><p>Documentos excluídos aparecem aqui antes de serem removidos definitivamente.</p>`
-      : `<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M9 15l6-6M10.5 6.5l1-1a4 4 0 1 1 6 6l-1 1M13.5 17.5l-1 1a4 4 0 1 1-6-6l1-1"/></svg>
-          <h3>Nenhum documento ainda</h3><p>Clique no botão + para adicionar o link do seu primeiro certificado, documento ou material.</p>`;
-    return;
-  }
-  grid.style.display = 'grid';
-  empty.style.display = 'none';
-
-  grid.innerHTML = docs.map(d=>{
-    let expiryBadge = '';
-    if(d.expiryDate && !d.deleted){
-      const dleft = daysUntil(d.expiryDate);
-      if(dleft < 0) expiryBadge = `<span class="badge-expiry">Vencido</span>`;
-      else if(dleft <= 30) expiryBadge = `<span class="badge-expiry warn">Vence em ${dleft}d</span>`;
-    }
-    const host = linkHost(d.url);
-    return `<div class="doc-card" onclick="openViewModal('${d.id}')">
-      <div class="doc-card-top">
-        <div class="doc-icon">${docIconHtml(d, 160)}</div>
-      </div>
-      <div>
-        <div class="doc-name">${escapeHtml(d.name)}</div>
-        <div class="doc-meta">${formatDate(d.addedDate)}${host ? ' · '+escapeHtml(host) : ''}</div>
-      </div>
-      <div class="tag-row">
-        <span class="tag category">${escapeHtml(d.category)}</span>
-        ${expiryBadge}
-        ${(d.tags||[]).slice(0,2).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ---------------- Add / Edit modal ---------------- */
-function openAddModal(){
-  editingDocId = null;
-  document.getElementById('editModalTitle').textContent = 'Adicionar documento';
-  document.getElementById('docUrl').value = '';
-  document.getElementById('docName').value = '';
-  document.getElementById('docCategory').value = 'Certificados';
-  document.getElementById('docExpiry').value = '';
-  document.getElementById('docTags').value = '';
-  document.getElementById('docNotes').value = '';
-  document.getElementById('newCategoryField').style.display = 'none';
-  renderCategoryNav();
-  openModal('editModalOverlay');
-}
-
-function openEditModal(id){
-  const d = allDocs.find(x=>x.id===id);
-  if(!d) return;
-  editingDocId = id;
-  document.getElementById('editModalTitle').textContent = 'Editar documento';
-  document.getElementById('docUrl').value = d.url || '';
-  document.getElementById('docName').value = d.name;
-  renderCategoryNav();
-  document.getElementById('docCategory').value = d.category;
-  document.getElementById('docExpiry').value = d.expiryDate || '';
-  document.getElementById('docTags').value = (d.tags||[]).join(', ');
-  document.getElementById('docNotes').value = d.notes || '';
-  document.getElementById('newCategoryField').style.display = 'none';
-  closeModal('viewModalOverlay');
-  openModal('editModalOverlay');
-}
-
-function handleCategorySelectChange(){
-  const val = document.getElementById('docCategory').value;
-  document.getElementById('newCategoryField').style.display = val==='__new__' ? 'block' : 'none';
-}
-
-async function saveDocument(){
-  const url = document.getElementById('docUrl').value.trim();
-  const name = document.getElementById('docName').value.trim();
-  if(!url){ showToast('Cole o link do documento.', 'error'); return; }
-  if(!/^https?:\/\//i.test(url)){ showToast('O link precisa começar com http:// ou https://', 'error'); return; }
-  if(!name){ showToast('Dê um nome ao documento.', 'error'); return; }
-  let category = document.getElementById('docCategory').value;
-  if(category === '__new__'){
-    const newCat = document.getElementById('newCategoryInput').value.trim();
-    if(!newCat){ showToast('Digite o nome da nova categoria.', 'error'); return; }
-    category = newCat;
-    if(!customCategories.includes(newCat)){
-      customCategories.push(newCat);
-      localStorage.setItem('cofre_custom_categories', JSON.stringify(customCategories));
-    }
-  }
-  const expiryDate = document.getElementById('docExpiry').value || null;
-  const tags = document.getElementById('docTags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  const notes = document.getElementById('docNotes').value.trim();
-
-  let doc;
-  if(editingDocId){
-    doc = allDocs.find(x=>x.id===editingDocId);
-  } else {
-    doc = { id: crypto.randomUUID(), addedDate: new Date().toISOString().slice(0,10), deleted:false, deletedAt:null };
-  }
-  doc.url = url;
-  doc.name = name;
-  doc.category = category;
-  doc.expiryDate = expiryDate;
-  doc.tags = tags;
-  doc.notes = notes;
-
-  try{
-    const saved = await DataStore.put(doc);
-    if(editingDocId){
-      Object.assign(doc, saved);
-    } else {
-      allDocs.push(saved);
-    }
-    editingDocId = null;
-    closeModal('editModalOverlay');
-    renderCategoryNav();
-    renderDocs();
-    updateFooterCount();
-    showToast('Documento salvo.', 'success');
-  }catch(err){
-    console.error(err);
-    showToast('Falha ao salvar no Supabase. Tente novamente.', 'error');
-  }
-}
-
-/* ---------------- View modal ---------------- */
-function openViewModal(id){
-  const d = allDocs.find(x=>x.id===id);
-  if(!d) return;
-  const body = document.getElementById('viewModalBody');
-  const footer = document.getElementById('viewModalFooter');
-
-  let expiryLine = '';
-  if(d.expiryDate){
-    const dleft = daysUntil(d.expiryDate);
-    const status = dleft < 0 ? `<span style="color:var(--danger)">vencido há ${Math.abs(dleft)} dias</span>`
-      : dleft<=30 ? `<span style="color:#d4a63a">vence em ${dleft} dias</span>`
-      : `válido`;
-    expiryLine = `<div class="detail-row"><span>Validade</span><span>${formatDate(d.expiryDate)} · ${status}</span></div>`;
-  }
-
-  body.innerHTML = `
-    <div class="view-file-preview">
-      <div class="doc-icon">${docIconHtml(d, 480)}</div>
-      <div style="font-weight:500;">${escapeHtml(d.name)}</div>
-      <div class="doc-meta" style="margin-top:4px;">${escapeHtml(linkHost(d.url))}</div>
-    </div>
-    <div class="detail-row"><span>Link</span><span><a href="${escapeAttr(d.url)}" target="_blank" rel="noopener">${escapeHtml(d.url)}</a></span></div>
-    <div class="detail-row"><span>Categoria</span><span>${escapeHtml(d.category)}</span></div>
-    <div class="detail-row"><span>Adicionado em</span><span>${formatDate(d.addedDate)}</span></div>
-    ${expiryLine}
-    ${(d.tags&&d.tags.length) ? `<div class="detail-row"><span>Tags</span><span>${d.tags.map(escapeHtml).join(', ')}</span></div>` : ''}
-    ${d.notes ? `<div class="detail-row" style="display:block;"><span style="display:block;margin-bottom:4px;">Notas</span><span style="text-align:left;display:block;color:var(--text-dim);">${escapeHtml(d.notes)}</span></div>` : ''}
-  `;
-
-  if(d.deleted){
-    footer.innerHTML = `
-      <button class="btn" onclick="restoreDoc('${d.id}')">Restaurar</button>
-      <button class="btn btn-danger" onclick="permanentDelete('${d.id}')">Excluir definitivamente</button>
-    `;
-  } else {
-    footer.innerHTML = `
-      <button class="btn" onclick="openLink('${d.id}')">Abrir link</button>
-      <button class="btn" onclick="openEditModal('${d.id}')">Editar</button>
-      <button class="btn btn-danger" onclick="moveToTrash('${d.id}')">Excluir</button>
-    `;
-  }
-  openModal('viewModalOverlay');
-}
-
-function openLink(id){
-  const d = allDocs.find(x=>x.id===id);
-  if(!d || !d.url) return;
-  window.open(d.url, '_blank', 'noopener');
-}
-
-async function moveToTrash(id){
-  const d = allDocs.find(x=>x.id===id);
-  if(!d) return;
-  const prev = {deleted:d.deleted, deletedAt:d.deletedAt};
-  d.deleted = true;
-  d.deletedAt = new Date().toISOString();
-  try{
-    await DataStore.put(d);
-    closeModal('viewModalOverlay');
-    renderCategoryNav();
-    renderDocs();
-    showToast('Movido para a lixeira.', 'success');
-  }catch(err){
-    console.error(err);
-    Object.assign(d, prev);
-    showToast('Falha ao excluir no Supabase. Tente novamente.', 'error');
-  }
-}
-
-async function restoreDoc(id){
-  const d = allDocs.find(x=>x.id===id);
-  if(!d) return;
-  const prev = {deleted:d.deleted, deletedAt:d.deletedAt};
-  d.deleted = false;
-  d.deletedAt = null;
-  try{
-    await DataStore.put(d);
-    closeModal('viewModalOverlay');
-    renderCategoryNav();
-    renderDocs();
-    showToast('Documento restaurado.', 'success');
-  }catch(err){
-    console.error(err);
-    Object.assign(d, prev);
-    showToast('Falha ao restaurar no Supabase. Tente novamente.', 'error');
-  }
-}
-
-async function permanentDelete(id){
-  if(!confirm('Excluir definitivamente? Esta ação não pode ser desfeita. O arquivo original na nuvem não é afetado — apenas a referência aqui no cofre.')) return;
-  try{
-    await DataStore.deleteHard(id);
-    allDocs = allDocs.filter(x=>x.id!==id);
-    closeModal('viewModalOverlay');
-    renderCategoryNav();
-    renderDocs();
-    updateFooterCount();
-    showToast('Documento excluído definitivamente.', 'success');
-  }catch(err){
-    console.error(err);
-    showToast('Falha ao excluir no Supabase. Tente novamente.', 'error');
-  }
-}
-
-/* ---------------- Backup / Restore ---------------- */
-async function exportBackup(){
-  try{
-    const docs = await DataStore.getAll();
-    const payload = { version:2, exportDate: new Date().toISOString(), documents: docs };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const stamp = new Date().toISOString().slice(0,10);
-    a.href = url; a.download = `cofre-backup-${stamp}.json`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 2000);
-    showToast('Backup baixado com sucesso.', 'success');
-  }catch(err){
-    console.error(err);
-    showToast('Falha ao gerar backup a partir do Supabase.', 'error');
-  }
-}
-
-async function handleImportFile(file){
-  if(!file) return;
-  const proceed = confirm(
-    'Importar backup.\n\nOK = mesclar com os documentos atuais\nCancelar = cancelar importação'
-  );
-  if(!proceed){ document.getElementById('importInput').value=''; return; }
-  try{
-    const text = await file.text();
-    const payload = JSON.parse(text);
-    let imported = 0;
-    for(const item of (payload.documents||[])){
-      const doc = {
-        id: item.id || crypto.randomUUID(),
-        url: item.url || '',
-        name: item.name, category: item.category, tags: item.tags||[], notes: item.notes||'',
-        expiryDate: item.expiryDate||null,
-        addedDate: item.addedDate || item.uploadDate || new Date().toISOString().slice(0,10),
-        deleted: !!item.deleted, deletedAt: item.deletedAt||null
-      };
-      await DataStore.put(doc);
-      imported++;
-    }
-    allDocs = await DataStore.getAll();
-    renderCategoryNav();
-    renderDocs();
-    updateFooterCount();
-    showToast(`${imported} documento(s) importado(s).`, 'success');
-  }catch(err){
-    console.error(err);
-    showToast('Falha ao importar backup. Verifique o arquivo.', 'error');
-  }
-  document.getElementById('importInput').value = '';
-}
-
-/* ---------------- Footer count ---------------- */
-function updateFooterCount(){
-  const n = allDocs.filter(d=>!d.deleted).length;
-  document.getElementById('storageText').textContent = `${n} documento${n===1?'':'s'} indexado${n===1?'':'s'}`;
-}
-
-/* ---------------- Utils ---------------- */
-function formatDate(dateStr){
-  if(!dateStr) return '—';
-  const d = new Date(dateStr + (dateStr.length<=10 ? 'T00:00:00' : ''));
-  return d.toLocaleDateString('pt-BR');
-}
-function escapeHtml(str){
-  return String(str||'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-}
-function escapeAttr(str){ return escapeHtml(str).replace(/`/g,'&#96;'); }
-
-function openModal(id){ document.getElementById(id).classList.add('active'); }
-function closeModal(id){ document.getElementById(id).classList.remove('active'); }
-document.querySelectorAll('.modal-overlay').forEach(ov=>{
-  ov.addEventListener('click', (e)=>{ if(e.target===ov) closeModal(ov.id); });
+/* ---------- reordenar (arrastar pela alça) ---------- */
+let drag=null;
+$('list').addEventListener('pointerdown',e=>{
+  const g=e.target.closest('.grip');if(!g)return;
+  e.preventDefault();drag=g.closest('.row');drag.classList.add('dragging');
 });
+addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const y=e.clientY;
+  for(let p=drag.previousElementSibling;p;p=drag.previousElementSibling){
+    const b=p.getBoundingClientRect();if(y<b.top+b.height/2)drag.parentNode.insertBefore(p,drag.nextSibling);else break;
+  }
+  for(let n=drag.nextElementSibling;n;n=drag.nextElementSibling){
+    const b=n.getBoundingClientRect();if(y>b.top+b.height/2)drag.parentNode.insertBefore(n,drag);else break;
+  }
+  if(y<90)scrollBy(0,-14);else if(y>innerHeight-90)scrollBy(0,14);
+});
+async function endDrag(){
+  if(!drag)return;
+  const ids=[...$('list').children].map(li=>li.dataset.id);
+  drag.classList.remove('dragging');drag=null;
+  const vis=ids.map(find).filter(Boolean),slots=vis.map(d=>d.sortOrder).sort((a,b)=>a-b);
+  vis.forEach((d,i)=>d.sortOrder=slots[i]);
+  try{
+    if(hasSort){const ch=docs.filter(d=>d.sortOrder!==d._so);if(ch.length)await putMany(ch)}
+    else localStorage.setItem('cofre_order',JSON.stringify([...docs].sort((a,b)=>a.sortOrder-b.sortOrder).map(d=>d.id)));
+  }catch(e){console.error(e);toast('Não consegui salvar a nova ordem.')}
+}
+addEventListener('pointerup',endDrag);addEventListener('pointercancel',endDrag);
 
-function showToast(msg, type='success'){
-  const wrap = document.getElementById('toastWrap');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  wrap.appendChild(t);
-  setTimeout(()=>{ t.remove(); }, 3200);
+/* ---------- ajustes ---------- */
+function openSettings(){$('sDrive').value=drive;openM('mSet')}
+async function saveDrive(){
+  const v=$('sDrive').value.trim(),u=v?normUrl(v):'';
+  if(v&&!u){toast('Link inválido.');return}
+  try{await saveCfg({...cfg,extra:await encStr(JSON.stringify({drive:u}),dek)});drive=u;toast('Link do Drive salvo.')}
+  catch(e){console.error(e);toast('Falha ao salvar.')}
+}
+async function changePw(){
+  const a=$('pw0').value,b=$('pw1').value,c=$('pw2').value,e=$('pwErr');e.textContent='';
+  if(b.length<6){e.textContent='Nova senha: mínimo 6 caracteres.';return}
+  if(b!==c){e.textContent='As senhas não coincidem.';return}
+  try{await decStr(cfg.wrapped,await deriveKey(a,b64d(cfg.salt)))}catch(x){e.textContent='Senha atual incorreta.';return}
+  try{
+    const raw=new Uint8Array(await crypto.subtle.exportKey('raw',dek)),salt=crypto.getRandomValues(new Uint8Array(16));
+    await saveCfg({...cfg,salt:b64e(salt),wrapped:await encStr(b64e(raw),await deriveKey(b,salt))});
+    ['pw0','pw1','pw2'].forEach(i=>$(i).value='');closeM('mPw');closeM('mSet');toast('Senha trocada.');
+  }catch(x){console.error(x);e.textContent='Falha ao salvar a nova senha.'}
+}
+function exportJson(){
+  if(!confirm('A cópia sai SEM criptografia (nomes e links legíveis). Guarde em local seguro. Continuar?'))return;
+  const out=docs.map(({id,name,category,url,tags,notes,expiryDate,addedDate,deleted,deletedAt})=>({id,name,category,url,tags,notes,expiryDate,addedDate,deleted,deletedAt}));
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify({version:3,documents:out},null,2)],{type:'application/json'}));
+  a.download=`cofre-backup-${today()}.json`;document.body.appendChild(a);a.click();a.remove();
+}
+async function importJson(file){
+  if(!file)return;
+  try{
+    const p=JSON.parse(await file.text()),items=(Array.isArray(p)?p:p.documents)||[],list=[];
+    let top=Math.min(0,...docs.map(x=>x.sortOrder));
+    for(const it of items){
+      const url=normUrl(it.url||'');if(!url||!it.name)continue;
+      let d=it.id&&find(it.id);
+      const data={url,name:it.name,category:it.category||'Outros',tags:it.tags||[],notes:it.notes||'',expiryDate:it.expiryDate||null};
+      if(d)Object.assign(d,data);
+      else{d={id:it.id||crypto.randomUUID(),addedDate:it.addedDate||today(),deleted:!!it.deleted,deletedAt:it.deletedAt||null,_so:null,sortOrder:--top,...data};docs.push(d)}
+      list.push(d);
+    }
+    await putMany(list);render();toast(list.length+' documento(s) importado(s).');
+  }catch(e){console.error(e);toast('Arquivo inválido ou falha ao importar.')}
+  $('sFile').value='';
 }
 
-/* ---------------- Boot ---------------- */
-checkAuthOnLoad();
+/* ---------- eventos ---------- */
+$('sBtn').onclick=doSetup;$('lBtn').onclick=doUnlock;
+$('lp').onkeydown=e=>{if(e.key==='Enter')doUnlock()};
+$('sp2').onkeydown=e=>{if(e.key==='Enter')doSetup()};
+$('bDrive').onclick=openDrive;$('bSet').onclick=openSettings;$('bLock').onclick=lockNow;
+$('eDrive').onclick=openDrive;
+$('fab').onclick=newDoc;$('eSave').onclick=saveDoc;
+$('eCat').onchange=()=>{$('eNew').hidden=$('eCat').value!=='__new__'};
+$('q').oninput=render;
+$('orgBtn').onclick=()=>{orgMode=!orgMode;render()};
+$('chips').onclick=e=>{const c=e.target.closest('.chip');if(c){view=c.dataset.v;render()}};
+$('list').onclick=e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;
+  const id=b.closest('.row').dataset.id;
+  b.dataset.a==='open'?openDoc(id):openActions(id);
+};
+$('sDriveSave').onclick=saveDrive;
+$('sPw').onclick=()=>openM('mPw');$('pwSave').onclick=changePw;
+$('sExp').onclick=exportJson;$('sImp').onclick=()=>$('sFile').click();
+$('sFile').onchange=e=>importJson(e.target.files[0]);
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeM(b.dataset.close));
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on')}));
+addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.ov.on').forEach(o=>o.classList.remove('on'))});
+
+boot();
 </script>
 </body>
 </html>
