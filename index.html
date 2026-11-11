@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#241811">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cofre">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Cofre de Documentos</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📜</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,17 +30,33 @@ button{font-family:inherit}
 .ib{width:42px;height:42px;flex:none;border-radius:50%;border:1px solid var(--gold2);background:rgba(0,0,0,.25);color:var(--gold);display:grid;place-items:center;cursor:pointer;font-size:20px}
 .ib:active{background:rgba(207,168,76,.25)}
 
-.wrap{max-width:760px;margin:0 auto;padding:16px 14px}
 .search{display:flex;align-items:center;gap:10px;background:var(--parch);border:2px solid var(--gold2);border-radius:10px;padding:0 14px;box-shadow:inset 0 2px 6px rgba(60,35,10,.35)}
 .search svg{font-size:20px;color:var(--gold2);flex:none}
 .search input{flex:1;min-width:0;background:none;border:0;outline:0;font:inherit;font-size:1.15rem;padding:14px 0;color:var(--ink)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:14px 2px 6px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-@media(min-width:700px){.chips{flex-wrap:wrap;overflow:visible}}
-.chip{flex:none;border:1px solid var(--gold2);background:var(--leather);color:var(--gold);border-radius:999px;padding:7px 16px;font-size:1rem;cursor:pointer}
-.chip.on{background:linear-gradient(#e0bd63,#b8903a);color:var(--ink);border-color:#e8cd85;font-weight:600}
-.searching .chip{opacity:.45}
-.bar{display:flex;justify-content:space-between;align-items:center;color:#b9a27a;font-size:.95rem;padding:8px 4px}
+.layout{max-width:1020px;margin:0 auto;display:grid;grid-template-columns:230px 1fr;gap:18px;padding:16px 14px;align-items:start}
+.layout main{min-width:0}
+.side{position:sticky;top:80px;background:linear-gradient(var(--leather2),var(--leather));border:2px solid var(--gold2);border-radius:12px;padding:10px;max-height:calc(100vh - 100px);overflow:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.side-h{font-family:Cinzel,serif;color:#b9a27a;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px 8px}
+.sitem{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;border:1px solid transparent;color:var(--gold);font-size:1.02rem;cursor:pointer}
+.sitem:hover{background:rgba(207,168,76,.12)}
+.sitem svg{font-size:18px;flex:none}
+.sitem .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sitem small{color:#a58f63;font-size:.82rem}
+.sitem.on{background:linear-gradient(#e0bd63,#b8903a);color:var(--ink);border-color:#e8cd85;font-weight:600}
+.sitem.on small{color:#4a3512}
+.sx{flex:none;padding:0 6px;color:#a58f63;font-size:1.25rem;line-height:1}
+.side-add{margin-top:8px;width:100%;padding:10px;border-radius:8px;border:1.5px dashed var(--gold2);background:none;color:var(--gold);font-size:1rem;cursor:pointer}
+.scrim{display:none;position:fixed;inset:0;background:rgba(5,3,1,.6);z-index:30}
+.scrim.on{display:block}
+#bMenu{display:none}
+@media(max-width:799px){
+  .layout{display:block;padding:12px 14px}
+  #bMenu{display:grid}
+  .side{position:fixed;top:0;left:0;bottom:0;width:80%;max-width:300px;max-height:none;border-radius:0 14px 14px 0;z-index:40;transform:translateX(-105%);transition:transform .2s;padding-top:calc(14px + env(safe-area-inset-top))}
+  .side.open{transform:none}
+}
+.bar{display:flex;justify-content:space-between;align-items:baseline;gap:10px;color:#b9a27a;font-size:.95rem;padding:14px 4px 8px}
+.bar h2{display:inline;font-family:Cinzel,serif;color:var(--gold);font-size:1.1rem;font-weight:700;margin-right:8px}
 .lnk{background:none;border:0;color:var(--gold);font-size:inherit;text-decoration:underline;cursor:pointer;padding:6px}
 .on-parch .lnk{color:var(--ink2)}
 
@@ -47,7 +67,11 @@ button{font-family:inherit}
 .row.dragging{background:rgba(207,168,76,.4)}
 .rmain{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:12px 6px 12px 14px;background:none;border:0;color:inherit;text-align:left;cursor:pointer;font-size:inherit}
 .rmain:hover{background:rgba(207,168,76,.18)}
-.ico{flex:none;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--gold2);display:grid;place-items:center;color:#6e4f17;background:rgba(207,168,76,.25);font-size:20px}
+.ico{flex:none;width:44px;height:44px;border-radius:10px;border:1.5px solid var(--gold2);display:grid;place-items:center;color:#6e4f17;background:rgba(207,168,76,.25);font-size:20px;overflow:hidden}
+.ic{display:grid;place-items:center}
+.th{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.pv{border:1.5px solid var(--gold2);border-radius:8px;background:#f6ecd0;margin-bottom:6px;overflow:hidden;display:grid;place-items:center;cursor:zoom-in}
+.pv img{width:100%;max-height:230px;object-fit:contain;display:block}
 .txt{min-width:0;display:flex;flex-direction:column}
 .txt b{font-weight:600;font-size:1.15rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .txt small{color:var(--ink2);font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -56,7 +80,7 @@ button{font-family:inherit}
 .grip{display:none;flex:none;width:44px;align-self:stretch;place-items:center;color:var(--gold2);touch-action:none;cursor:grab;font-size:22px}
 .org .grip{display:grid}
 .empty{text-align:center;color:#b9a27a;padding:40px 10px;font-style:italic}
-.fab{position:fixed;right:max(18px,calc((100vw - 760px)/2 + 14px));bottom:calc(18px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:2px solid #e8cd85;background:linear-gradient(#e0bd63,#b8903a);color:var(--ink);font-size:28px;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.6);z-index:15}
+.fab{position:fixed;right:max(18px,calc((100vw - 1020px)/2 + 14px));bottom:calc(18px + env(safe-area-inset-bottom));width:58px;height:58px;border-radius:50%;border:2px solid #e8cd85;background:linear-gradient(#e0bd63,#b8903a);color:var(--ink);font-size:28px;display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.6);z-index:15}
 
 /* modais e portão */
 .ov{position:fixed;inset:0;background:rgba(5,3,1,.75);display:none;align-items:flex-end;justify-content:center;z-index:50}
@@ -122,18 +146,27 @@ details summary{cursor:pointer;color:var(--ink2);margin-top:14px}
 <!-- APP -->
 <div id="app" hidden>
   <header class="top">
+    <button class="ib" id="bMenu" title="Pastas"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg></button>
     <div class="brand"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z"/><path d="M9.5 12.5 11 14l3.5-3.5"/></svg><h1>Cofre de Documentos</h1></div>
+    <button class="ib" id="bInstall" title="Instalar app" hidden><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></button>
     <button class="ib" id="bDrive" title="Abrir meu Drive"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg></button>
     <button class="ib" id="bSet" title="Ajustes"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button>
     <button class="ib" id="bLock" title="Trancar"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></button>
   </header>
-  <main class="wrap">
-    <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="q" type="search" placeholder="Procurar no cofre…" autocomplete="off"></div>
-    <nav class="chips" id="chips"></nav>
-    <div class="bar"><span id="count"></span><button class="lnk" id="orgBtn">Organizar</button></div>
-    <ul class="list" id="list"></ul>
-    <div class="empty" id="empty" hidden></div>
-  </main>
+  <div class="layout">
+    <aside class="side" id="side">
+      <div class="side-h">Pastas</div>
+      <nav id="cats"></nav>
+      <button class="side-add" id="catAdd">+ Nova categoria</button>
+    </aside>
+    <main>
+      <div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input id="q" type="search" placeholder="Procurar em todas as pastas…" autocomplete="off"></div>
+      <div class="bar"><span><h2 id="title"></h2><span id="count"></span></span><button class="lnk" id="orgBtn">Organizar</button></div>
+      <ul class="list" id="list"></ul>
+      <div class="empty" id="empty" hidden></div>
+    </main>
+  </div>
+  <div class="scrim" id="scrim"></div>
   <button class="fab" id="fab" title="Novo documento"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
 </div>
 
@@ -173,6 +206,7 @@ details summary{cursor:pointer;color:var(--ink2);margin-top:14px}
     <input type="url" id="sDrive" placeholder="https://drive.google.com/drive/folders/…" inputmode="url">
     <button class="btn act" id="sDriveSave">Salvar link do Drive</button>
     <hr style="border:0;border-top:1px dashed var(--gold2);margin:16px 0 4px">
+    <button class="btn act" id="sInst">Instalar o app</button>
     <button class="btn act" id="sPw">Trocar senha</button>
     <button class="btn act" id="sExp">Exportar cópia (JSON)</button>
     <button class="btn act" id="sImp">Importar cópia</button>
@@ -192,6 +226,28 @@ details summary{cursor:pointer;color:var(--ink2);margin-top:14px}
     <div class="err" id="pwErr"></div>
   </div>
   <div class="mf"><button class="btn" data-close="mPw">Cancelar</button><button class="btn pri" id="pwSave">Trocar</button></div>
+</div></div>
+
+<!-- Modal: nova categoria -->
+<div class="ov" id="mCat"><div class="md">
+  <div class="mh">Nova categoria</div>
+  <div class="mb"><label>Nome da pasta</label><input type="text" id="cName" placeholder="Ex: Contratos, Imóvel, Veículo…"><div class="err" id="cErr"></div></div>
+  <div class="mf"><button class="btn" data-close="mCat">Cancelar</button><button class="btn pri" id="cSave">Criar</button></div>
+</div></div>
+
+<!-- Modal: visualizar aqui -->
+<div class="ov" id="mView"><div class="md" style="max-width:820px">
+  <div class="mh" id="vTitle"></div>
+  <div class="mb"><iframe id="vFrame" style="width:100%;height:66vh;border:1.5px solid var(--gold2);border-radius:8px;background:#fff" allow="autoplay" referrerpolicy="no-referrer"></iframe>
+  <div class="hint">Se aparecer “sem permissão”, o arquivo é privado.</div></div>
+  <div class="mf"><button class="btn" data-close="mView">Fechar</button><button class="btn pri" id="vOpen">Abrir no Drive</button></div>
+</div></div>
+
+<!-- Modal: como instalar -->
+<div class="ov" id="mInst"><div class="md">
+  <div class="mh">Instalar o app</div>
+  <div class="mb" id="iBody"></div>
+  <div class="mf"><button class="btn pri" data-close="mInst">Entendi</button></div>
 </div></div>
 
 <div class="toast" id="toast" hidden></div>
@@ -236,12 +292,13 @@ async function decStr(s,key){
 /*CRYPTO_END*/
 
 /* ---------- estado ---------- */
-let dek=null,cfgRow=null,cfg=null,hasSort=false,docs=[],view='__all__',orgMode=false,editId=null,drive='',loadFail=false;
+let dek=null,cfgRow=null,cfg=null,hasSort=false,docs=[],view='__all__',orgMode=false,editId=null,drive='',cats=[],loadFail=false;
 const today=()=>new Date().toLocaleDateString('sv');
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 let tt;function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3200)}
-const openM=id=>$(id).classList.add('on'), closeM=id=>$(id).classList.remove('on');
+const openM=id=>$(id).classList.add('on');
+const closeM=id=>{$(id).classList.remove('on');if(id==='mView')$('vFrame').src='about:blank'};
 function gate(w){$('app').hidden=true;$('gate').hidden=false;['pLoad','pSetup','pLock','pErr'].forEach(p=>$(p).hidden=p!==w)}
 function normUrl(u){u=u.trim();if(u&&!/^https?:\/\//i.test(u))u='https://'+u;try{new URL(u);return u}catch(e){return ''}}
 
@@ -356,15 +413,37 @@ function armIdle(){
 }
 async function startApp(){
   $('gate').hidden=true;$('app').hidden=false;
-  try{drive=JSON.parse(await decStr(cfg.extra,dek)).drive||''}catch(e){drive=''}
+  try{const x=JSON.parse(await decStr(cfg.extra,dek));drive=x.drive||'';cats=x.cats||[]}catch(e){drive='';cats=[]}
   $('count').textContent='Abrindo o cofre…';
   await refresh(true);armIdle();
 }
 
 /* ---------- renderização ---------- */
+/*DRIVE_START*/
+function driveInfo(url){
+  try{
+    const u=new URL(url);
+    if(!/^(drive|docs)\.google\.com$/.test(u.hostname))return null;
+    const m=u.pathname.match(/\/(file|document|spreadsheets|presentation)\/d\/([\w-]+)/);
+    let kind='file',id;
+    if(m){kind=m[1];id=m[2]}
+    else{id=u.searchParams.get('id');if(!id||/\/folders\//.test(u.pathname))return null}
+    const host=kind==='file'?'drive.google.com':'docs.google.com';
+    return {id,preview:`https://${host}/${kind}/d/${id}/preview`};
+  }catch(e){return null}
+}
+/*DRIVE_END*/
+const thumbUrl=(id,w)=>`https://drive.google.com/thumbnail?id=${id}&sz=w${w}`;
+function thumbErr(i){
+  if(!i.dataset.r){i.dataset.r='1';i.src='https://lh3.googleusercontent.com/d/'+i.dataset.id+'=w'+i.dataset.w;return}
+  const s=i.nextElementSibling;
+  if(s){i.hidden=true;s.hidden=false}else i.parentElement.remove();
+}
+const FOLDER='<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>';
+const TRASH='<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
 function catNames(){
-  const used=[...new Set(docs.filter(d=>!d.deleted).map(d=>d.category))];
-  return [...BASE.filter(c=>used.includes(c)),...used.filter(c=>!BASE.includes(c)).sort()];
+  const used=docs.filter(d=>!d.deleted).map(d=>d.category);
+  return [...new Set([...BASE,...cats,...used])];
 }
 function expTag(d){
   if(!d.expiryDate) return '';
@@ -375,13 +454,15 @@ function expTag(d){
 }
 function render(){
   const terms=norm($('q').value).trim().split(/\s+/).filter(Boolean);
-  document.body.classList.toggle('searching',terms.length>0);
-  const live=docs.filter(d=>!d.deleted),trash=docs.filter(d=>d.deleted);
-  const cats=catNames();
-  if(view!=='__all__'&&view!=='__trash__'&&!cats.includes(view)) view='__all__';
+  const live=docs.filter(d=>!d.deleted),trash=docs.filter(d=>d.deleted),names=catNames();
+  if(view!=='__all__'&&view!=='__trash__'&&!names.includes(view)) view='__all__';
   if(view==='__trash__'&&!trash.length) view='__all__';
-  $('chips').innerHTML=[['__all__','Todos'],...cats.map(c=>[c,c]),...(trash.length?[['__trash__','Lixeira']]:[])]
-    .map(([v,l])=>`<button class="chip${v===view?' on':''}" data-v="${esc(v)}">${esc(l)}</button>`).join('');
+  const cnt=c=>live.filter(d=>d.category===c).length;
+  const item=(v,l,n,ic,x)=>`<div class="sitem${v===view?' on':''}" data-v="${esc(v)}">${ic}<span class="n">${esc(l)}</span>${x||`<small>${n}</small>`}</div>`;
+  $('cats').innerHTML=item('__all__','Todos',live.length,FOLDER)
+    +names.map(c=>item(c,c,cnt(c),icon(c),cats.includes(c)&&!BASE.includes(c)&&!docs.some(d=>d.category===c)?`<span class="sx" data-del="${esc(c)}" title="Remover pasta vazia">×</span>`:null)).join('')
+    +(trash.length?item('__trash__','Lixeira',trash.length,TRASH):'');
+  $('title').textContent=terms.length?'Resultados':view==='__all__'?'Todos os documentos':view==='__trash__'?'Lixeira':view;
   let list;
   if(view==='__trash__') list=[...trash].sort((a,b)=>(b.deletedAt||'').localeCompare(a.deletedAt||''));
   else{
@@ -392,19 +473,47 @@ function render(){
   const showCat=view==='__all__'||view==='__trash__'||terms.length>0;
   $('list').className='list'+(orgMode&&view!=='__trash__'?' org':'');
   $('list').innerHTML=list.map(d=>{
+    const di=!d.deleted&&driveInfo(d.url);
     const sub=[showCat?esc(d.category):'',expTag(d)].filter(Boolean).join(' · ');
+    const ico=di
+      ?`<img class="th" loading="lazy" referrerpolicy="no-referrer" alt="" data-id="${di.id}" data-w="96" src="${thumbUrl(di.id,96)}" onerror="thumbErr(this)"><span class="ic" hidden>${icon(d.category)}</span>`
+      :`<span class="ic">${icon(d.category)}</span>`;
     return `<li class="row" data-id="${d.id}"><span class="grip">${GRIP}</span>
-      <button class="rmain" data-a="${view==='__trash__'?'more':'open'}"><span class="ico">${icon(d.category)}</span>
+      <button class="rmain" data-a="${view==='__trash__'?'more':'open'}"><span class="ico">${ico}</span>
       <span class="txt"><b>${esc(d.name)}</b>${sub?`<small>${sub}</small>`:''}</span></button>
       <button class="more" data-a="more" aria-label="Opções">${DOTS}</button></li>`}).join('');
   $('list').hidden=!list.length;
   const em=$('empty');em.hidden=!!list.length;
   if(loadFail) em.innerHTML='Não consegui carregar os documentos.<br><button class="lnk" onclick="refresh()">Tentar de novo</button>';
-  else if(!docs.length) em.textContent='O cofre está vazio. Toque no + para guardar o primeiro pergaminho.';
-  else em.textContent=terms.length?'Nada encontrado.':'Nenhum documento aqui.';
-  $('count').textContent=loadFail?'':terms.length?`${list.length} encontrado${list.length===1?'':'s'}`:`${list.length} documento${list.length===1?'':'s'}`;
+  else if(!docs.length) em.textContent='O cofre está vazio. Toque no + para guardar o primeiro documento.';
+  else em.textContent=terms.length?'Nada encontrado.':'Esta pasta está vazia. Toque no + para guardar um documento aqui.';
+  $('count').textContent=loadFail?'':`${list.length} ${terms.length?(list.length===1?'encontrado':'encontrados'):(list.length===1?'documento':'documentos')}`;
   $('orgBtn').hidden=view==='__trash__'||list.length<2;
   $('orgBtn').textContent=orgMode?'Concluir':'Organizar';
+}
+
+/* ---------- categorias (pastas) ---------- */
+async function saveExtra(){await saveCfg({...cfg,extra:await encStr(JSON.stringify({drive,cats}),dek)})}
+async function addCat(){
+  const n=$('cName').value.trim().replace(/\s+/g,' '),e=$('cErr');e.textContent='';
+  if(!n){e.textContent='Dê um nome à pasta.';return}
+  if(n.startsWith('__')){e.textContent='Nome inválido.';return}
+  const ex=catNames().find(c=>norm(c)===norm(n));
+  if(ex){view=ex;closeM('mCat');render();return}
+  cats.push(n);
+  try{await saveExtra();view=n;closeM('mCat');render();toast('Pasta criada.')}
+  catch(x){console.error(x);cats.pop();e.textContent='Falha ao salvar. Tente de novo.'}
+}
+async function removeCat(c){
+  if(!confirm(`Remover a pasta "${c}"? Ela está vazia.`))return;
+  const bk=[...cats];cats=cats.filter(x=>x!==c);
+  try{await saveExtra();if(view===c)view='__all__';render()}
+  catch(e){console.error(e);cats=bk;toast('Falha ao remover.')}
+}
+async function ensureCat(c){
+  if(catNames().some(x=>norm(x)===norm(c)))return;
+  cats.push(c);
+  try{await saveExtra()}catch(e){console.error(e)}
 }
 
 /* ---------- ações ---------- */
@@ -413,13 +522,15 @@ function openDoc(id){const d=find(id);if(d&&d.url)window.open(d.url,'_blank','no
 function openDrive(){if(drive)window.open(drive,'_blank','noopener');else{openSettings();toast('Defina aqui o link padrão do Drive.')}}
 function openActions(id){
   const d=find(id);if(!d)return;
+  const di=!d.deleted&&driveInfo(d.url);
   $('aTitle').textContent=d.name;
-  $('aBody').innerHTML=d.deleted
+  $('aBody').innerHTML=(di?`<div class="pv" onclick="openViewer('${id}')"><img referrerpolicy="no-referrer" alt="" data-id="${di.id}" data-w="480" src="${thumbUrl(di.id,480)}" onerror="thumbErr(this)"></div>`:'')+(d.deleted
     ?`<button class="btn act" onclick="restoreDoc('${id}')">Restaurar</button><button class="btn act dng" onclick="purgeDoc('${id}')">Excluir para sempre</button>`
-    :`<button class="btn act" onclick="closeM('mAct');openDoc('${id}')">Abrir</button>
+    :`<button class="btn act" onclick="closeM('mAct');openDoc('${id}')">Abrir no Drive</button>
+      ${di?`<button class="btn act" onclick="openViewer('${id}')">Visualizar aqui</button>`:''}
       <button class="btn act" onclick="copyLink('${id}')">Copiar link</button>
       <button class="btn act" onclick="editDoc('${id}')">Editar</button>
-      <button class="btn act dng" onclick="trashDoc('${id}')">Mover para a lixeira</button>`;
+      <button class="btn act dng" onclick="trashDoc('${id}')">Mover para a lixeira</button>`);
   openM('mAct');
 }
 async function copyLink(id){
@@ -448,6 +559,7 @@ async function saveDoc(){
   if(!url||!name){toast('Informe um link válido e um nome.');return}
   let cat=$('eCat').value;
   if(cat==='__new__'){cat=$('eNew').value.trim();if(!cat){toast('Dê um nome à categoria.');return}}
+  {const ex=catNames().find(c=>norm(c)===norm(cat));if(ex)cat=ex;else ensureCat(cat)}
   const data={url,name,category:cat,expiryDate:$('eExp').value||null,
     tags:$('eTags').value.split(',').map(s=>s.trim()).filter(Boolean),notes:$('eNotes').value.trim()};
   const isNew=!editId;
@@ -508,8 +620,9 @@ function openSettings(){$('sDrive').value=drive;openM('mSet')}
 async function saveDrive(){
   const v=$('sDrive').value.trim(),u=v?normUrl(v):'';
   if(v&&!u){toast('Link inválido.');return}
-  try{await saveCfg({...cfg,extra:await encStr(JSON.stringify({drive:u}),dek)});drive=u;toast('Link do Drive salvo.')}
-  catch(e){console.error(e);toast('Falha ao salvar.')}
+  const old=drive;drive=u;
+  try{await saveExtra();toast('Link do Drive salvo.')}
+  catch(e){console.error(e);drive=old;toast('Falha ao salvar.')}
 }
 async function changePw(){
   const a=$('pw0').value,b=$('pw1').value,c=$('pw2').value,e=$('pwErr');e.textContent='';
@@ -547,20 +660,81 @@ async function importJson(file){
   $('sFile').value='';
 }
 
+/* ---------- visualizar aqui ---------- */
+function openViewer(id){
+  const d=find(id),di=d&&driveInfo(d.url);
+  if(!di){toast('Prévia disponível só para arquivos do Google Drive.');return}
+  closeM('mAct');
+  $('vTitle').textContent=d.name;$('vFrame').src=di.preview;
+  $('vOpen').onclick=()=>openDoc(id);openM('mView');
+}
+
+/* ---------- instalável (PWA) ---------- */
+function drawIcon(n,mask){
+  const c=document.createElement('canvas');c.width=c.height=n;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,n);g.addColorStop(0,'#33241a');g.addColorStop(1,'#140e09');x.fillStyle=g;
+  if(mask)x.fillRect(0,0,n,n);
+  else{const r=n*.22;x.beginPath();x.moveTo(r,0);x.arcTo(n,0,n,n,r);x.arcTo(n,n,0,n,r);x.arcTo(0,n,0,0,r);x.arcTo(0,0,n,0,r);x.closePath();x.fill()}
+  const s=n*(mask?.028:.032);
+  x.translate(n/2,n/2);x.scale(s,s);x.translate(-12,-12);
+  const sg=x.createLinearGradient(0,2,0,22);sg.addColorStop(0,'#e0bd63');sg.addColorStop(1,'#b8903a');
+  const shield=new Path2D('M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4Z');
+  x.fillStyle=sg;x.fill(shield);x.lineWidth=.9;x.strokeStyle='#8a6a26';x.lineJoin='round';x.stroke(shield);
+  x.lineWidth=1.8;x.lineCap='round';x.lineJoin='round';x.strokeStyle='#2b1c0f';x.stroke(new Path2D('M8.8 12.3 11.1 14.6 15.4 9.6'));
+  return c.toDataURL('image/png');
+}
+function setupPwa(){
+  const i192=drawIcon(192,false),i512=drawIcon(512,false),m512=drawIcon(512,true),a180=drawIcon(180,true);
+  document.querySelectorAll('link[rel=icon]').forEach(l=>l.remove());
+  const link=(rel,href,sizes)=>{const l=document.createElement('link');l.rel=rel;l.href=href;if(sizes)l.sizes=sizes;document.head.appendChild(l)};
+  link('icon',i192,'192x192');link('apple-touch-icon',a180,'180x180');
+  const base=location.href.split('#')[0].split('?')[0];
+  const man={name:'Cofre de Documentos',short_name:'Cofre',description:'Seus documentos, organizados e protegidos.',
+    start_url:base,scope:base.slice(0,base.lastIndexOf('/')+1),display:'standalone',orientation:'portrait',lang:'pt-BR',
+    background_color:'#140e09',theme_color:'#241811',
+    icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any'},{src:m512,sizes:'512x512',type:'image/png',purpose:'maskable'}]};
+  link('manifest',URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'})));
+  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if(isStandalone())$('sInst').hidden=true;
+}
+let ip=null;
+const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(!isStandalone())$('bInstall').hidden=false});
+addEventListener('appinstalled',()=>{ip=null;$('bInstall').hidden=true;$('sInst').hidden=true;toast('Cofre instalado!')});
+async function doInstall(){
+  if(isStandalone()){toast('O app já está instalado.');return}
+  if(ip){ip.prompt();try{await ip.userChoice}catch(e){}ip=null;$('bInstall').hidden=true;return}
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  $('iBody').innerHTML=ios
+    ?'<p><b>iPhone / iPad (Safari):</b> toque em <b>Compartilhar</b> (o quadrado com a seta) e depois em <b>Adicionar à Tela de Início</b>.</p>'
+    :'<p><b>Computador e Android (Chrome / Edge):</b> abra o menu do navegador (⋮) e escolha <b>Instalar app</b>, ou use o ícone de instalação na barra de endereço.</p><div class="hint">Se a opção não aparecer, confira se o arquivo <b>sw.js</b> está na mesma pasta do HTML.</div>';
+  openM('mInst');
+}
+
 /* ---------- eventos ---------- */
 $('sBtn').onclick=doSetup;$('lBtn').onclick=doUnlock;
 $('lp').onkeydown=e=>{if(e.key==='Enter')doUnlock()};
 $('sp2').onkeydown=e=>{if(e.key==='Enter')doSetup()};
 $('bDrive').onclick=openDrive;$('bSet').onclick=openSettings;$('bLock').onclick=lockNow;
+$('bInstall').onclick=doInstall;$('sInst').onclick=()=>{closeM('mSet');doInstall()};
+const closeSide=()=>{$('side').classList.remove('open');$('scrim').classList.remove('on')};
+$('bMenu').onclick=()=>{$('side').classList.add('open');$('scrim').classList.add('on')};
+$('scrim').onclick=closeSide;
+$('cats').onclick=e=>{
+  const x=e.target.closest('.sx');if(x){removeCat(x.dataset.del);return}
+  const i=e.target.closest('.sitem');if(i){view=i.dataset.v;closeSide();render();scrollTo(0,0)}
+};
+$('catAdd').onclick=()=>{closeSide();$('cName').value='';$('cErr').textContent='';openM('mCat');$('cName').focus()};
+$('cSave').onclick=addCat;$('cName').onkeydown=e=>{if(e.key==='Enter')addCat()};
 $('eDrive').onclick=openDrive;
 $('fab').onclick=newDoc;$('eSave').onclick=saveDoc;
 $('eCat').onchange=()=>{$('eNew').hidden=$('eCat').value!=='__new__'};
 $('q').oninput=render;
 $('orgBtn').onclick=()=>{orgMode=!orgMode;render()};
-$('chips').onclick=e=>{const c=e.target.closest('.chip');if(c){view=c.dataset.v;render()}};
 $('list').onclick=e=>{
   const b=e.target.closest('[data-a]');if(!b)return;
   const id=b.closest('.row').dataset.id;
+  if(e.target.closest('.th:not([hidden])')&&view!=='__trash__'){openViewer(id);return}
   b.dataset.a==='open'?openDoc(id):openActions(id);
 };
 $('sDriveSave').onclick=saveDrive;
@@ -568,9 +742,10 @@ $('sPw').onclick=()=>openM('mPw');$('pwSave').onclick=changePw;
 $('sExp').onclick=exportJson;$('sImp').onclick=()=>$('sFile').click();
 $('sFile').onchange=e=>importJson(e.target.files[0]);
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>closeM(b.dataset.close));
-document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on')}));
-addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.ov.on').forEach(o=>o.classList.remove('on'))});
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeM(o.id)}));
+addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.ov.on').forEach(o=>closeM(o.id))});
 
+setupPwa();
 boot();
 </script>
 </body>
